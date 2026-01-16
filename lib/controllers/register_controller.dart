@@ -19,11 +19,11 @@ class RegisterController {
       if (user == null) {
         return "Registration failed. Try again.";
       }
-      await _database.collection("Users").doc(user.uid).set({
+      await _database.collection("users").doc(user.uid).set({
         "uid": user.uid,
-        "Name": name,
-        "Email": email,
-        "CreatedAt": FieldValue.serverTimestamp(),
+        "name": name,
+        "email": email,
+        "createdAt": FieldValue.serverTimestamp(),
       });
       return null;
     } on FirebaseAuthException catch (e) {

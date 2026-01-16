@@ -38,7 +38,8 @@ class _ChatState extends State<Chat> {
     });
     _textC.clear();
     try {
-      final reply = await _chat.sendMessage(text);
+      final result = await _chat.sendMessage(text);
+      final reply = result['reply'].toString();
 
       if (!mounted) return;
       setState(() {

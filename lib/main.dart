@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-//import 'views/login.dart';
-//import 'views/register.dart';
+import 'views/login.dart';
+import 'views/register.dart';
 import 'views/chat.dart';
 
 Future<void> main() async {
@@ -17,11 +17,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 'views/chat',
+      initialRoute: 'views/login',
       routes: {
         'views/chat': (context) => Chat(),
-        // 'views/login': (context) => Login(),
-        // 'views/register': (context) => Register(),
+        'views/login': (context) => Login(),
+        'views/register': (context) => Register(),
       },
     );
   }
