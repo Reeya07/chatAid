@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
-import '../views/chat.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -83,6 +82,7 @@ class LoginState extends State<Login> {
         backgroundColor: errorMessage == null ? Colors.green : Colors.red,
       ),
     );
+    Navigator.pushReplacementNamed(context, 'views/chat');
   }
 
   Future<void> resetPassword() async {
