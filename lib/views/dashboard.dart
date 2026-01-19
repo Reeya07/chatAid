@@ -19,6 +19,10 @@ class _DashboardState extends State<Dashboard> {
   final List<Map<String, String>> moods = const [
     //to add emoji thing
     {"emoji": "😄", "label": "happy"},
+    {"emoji": "🙂", "label": "okay"},
+    {"emoji": "😐", "label": "neutral"},
+    {"emoji": "😢", "label": "sad"},
+    {"emoji": "😡", "label": "angry"},
   ];
 
   Future<void> _saveMoodLog(
