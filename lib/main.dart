@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'views/login.dart';
 import 'views/register.dart';
 import 'views/chat.dart';
+import 'views/dashboard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +18,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 'views/login',
+      initialRoute: 'views/dashboard',
       routes: {
         'views/chat': (context) => Chat(),
         'views/login': (context) => Login(),
         'views/register': (context) => Register(),
+        'views/dashboard': (context) => Dashboard(),
       },
     );
   }
