@@ -29,9 +29,7 @@ class LoginState extends State<Login> {
       return;
     }
 
-    setState(() {
-      _isloading = true;
-    });
+    setState(() => _isloading = true);
 
     final String? errorMessage = await _loginController.login(
       email: emailC.text,
@@ -41,26 +39,21 @@ class LoginState extends State<Login> {
     if (!mounted) {
       return;
     }
-    setState(() {
-      _isloading = false;
-    });
+    setState(() => _isloading = false);
     //boolean in all state class that tells flutter widget is true/false.
-    if (errorMessage == null) {
+    if (errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login Successful.'),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
-      Navigator.pushReplacementNamed(context, 'views/chat');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: const Color.fromARGB(255, 255, 0, 0),
-        ),
-      );
+      return;
     }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login Successful.'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    Navigator.pushReplacementNamed(context, 'views/dashboard');
   }
 
   //To add anonymous
@@ -82,7 +75,7 @@ class LoginState extends State<Login> {
         backgroundColor: errorMessage == null ? Colors.green : Colors.red,
       ),
     );
-    Navigator.pushReplacementNamed(context, 'views/chat');
+    Navigator.pushReplacementNamed(context, 'views/dashboard');
   }
 
   Future<void> resetPassword() async {
@@ -93,7 +86,6 @@ class LoginState extends State<Login> {
           backgroundColor: Colors.red,
         ),
       );
-      return;
     }
     setState(() {
       _isloading = true;
@@ -290,7 +282,7 @@ class LoginState extends State<Login> {
                                             width: 20,
                                             height: 20,
                                             child: CircularProgressIndicator(
-                                              strokeWidth: 20,
+                                              strokeWidth: 2,
                                               color: Colors.white,
                                             ),
                                           )

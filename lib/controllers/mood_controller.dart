@@ -10,10 +10,32 @@ class MoodController {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception("User not logged in");
 
-    await _database
+    await _database.collection("users").doc(uid).collection("mood_logs").add({
+      ...log.toMap(),
+      "createdAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<List<MoodLog>> streamLast7Days() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return const Stream.empty();
+
+    final now = DateTime.now();
+    final start = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: 6));
+
+    return _database
         .collection("users")
         .doc(uid)
         .collection("mood_logs")
-        .add(log.toMap());
+        .where("createdAt", isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .orderBy("createdAt", descending: false)
+        .snapshots()
+        .map(
+          (snap) => snap.docs.map((d) => MoodLog.fromMap(d.data())).toList(),
+        );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 class LoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -15,13 +16,20 @@ class LoginController {
         return 'User not found with this email';
       } else if (e.code == "wrong-password") {
         return 'Incorrect Password';
-      } else if (e.code == "Invalid-email") {
+      } else if (e.code == "invalid-email") {
         return 'Invalid email address.';
+      } else if (e.code == "invalid-credential") {
+        return 'Email or password is incorrect.';
       } else {
         return e.message ?? "Authentication error.";
       }
+    } on PlatformException catch (e) {
+      if (e.code == 'ERROR_INVALID_CREDENTIAL') {
+        return 'Email or password is incorrect';
+      }
+      return e.message ?? 'Login failed. Please try again.';
     } catch (e) {
-      return "Unexpected error: $e";
+      return 'Unexpected error: $e';
     }
   }
 

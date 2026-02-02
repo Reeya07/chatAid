@@ -57,7 +57,7 @@ class RegisterState extends State<Register> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pushReplacementNamed(context, 'views/chat');
+      Navigator.pushReplacementNamed(context, 'views/dashbaord');
       nameC.clear();
       emailC.clear();
       passwordC.clear();
