@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../views/mood_history.dart';
 import 'chat.dart';
 import '../controllers/mood_controller.dart';
 import '../models/mood_log.dart';
@@ -105,10 +106,12 @@ class DashboardState extends State<Dashboard> {
         SizedBox(width: 12),
         Expanded(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Hi $name,Welcome to your",
-                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ],
@@ -117,7 +120,8 @@ class DashboardState extends State<Dashboard> {
         SizedBox(width: 12),
         Text(
           "Mental Health Companion",
-          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ],
@@ -159,7 +163,7 @@ class DashboardState extends State<Dashboard> {
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "How can I assist tou today",
+                  "How can I assist you today",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
@@ -306,7 +310,15 @@ class DashboardState extends State<Dashboard> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ),
-              TextButton(onPressed: () {}, child: Text("View insights")),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => MoodHistory()),
+                  );
+                },
+                child: Text("View insights"),
+              ),
             ],
           ),
           SizedBox(height: 10),
@@ -400,7 +412,16 @@ class DashboardState extends State<Dashboard> {
               label: "Resource",
               onTap: () {},
             ),
-            tile(icon: Icons.show_chart, label: "Tracker", onTap: () {}),
+            tile(
+              icon: Icons.show_chart,
+              label: "Tracker",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MoodHistory()),
+                );
+              },
+            ),
           ],
         ),
       ],

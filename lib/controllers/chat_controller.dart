@@ -43,4 +43,28 @@ class ChatController {
     await chatRep.saveMessage(uid, Chatinfo(role: 'assistant', text: reply));
     return {'reply': reply, 'emotion': emotion, 'score': score};
   }
+
+  Future<Map<String, dynamic>> reframeThought({
+    required String situation,
+    required String thought,
+    required String thinkingPattern,
+    required String evidenceFor,
+    required String advice,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/cbt/reframe'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "situation": situation,
+        "thought": thought,
+        "thinking_pattern": thinkingPattern,
+        "evidence_for": evidenceFor,
+        "advice": advice,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception("Failed to reframe");
+    }
+    return jsonEncode(response.body) as Map<String, dynamic>;
+  }
 }

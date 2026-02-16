@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mental_health_app/views/mood_history.dart';
 import 'views/login.dart';
 import 'views/register.dart';
 import 'views/chat.dart';
 import 'views/dashboard.dart';
+import 'views/cbt_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
         'views/login': (context) => Login(),
         'views/register': (context) => Register(),
         'views/dashboard': (context) => Dashboard(),
+        'views/CbtScreen': (context) => CbtScreen(),
+        'views/moodHistory': (context) => MoodHistory(),
       },
     );
   }
