@@ -29,9 +29,11 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   fl_chart: ^1.1.1
+  just_audio: ^0.10.5
 
   flutter:
     sdk: flutter
+    
 
     
 
@@ -67,7 +69,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/chatbot.png
+      - assets/audio/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:mental_health_app/views/mood_history.dart';
+import 'views/nav.dart';
+import 'views/mood_history.dart';
 import 'views/login.dart';
 import 'views/register.dart';
 import 'views/chat.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 'views/dashboard',
+      initialRoute: 'views/nav',
       routes: {
         'views/chat': (context) => Chat(),
         'views/login': (context) => Login(),
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         'views/dashboard': (context) => Dashboard(),
         'views/CbtScreen': (context) => CbtScreen(),
         'views/moodHistory': (context) => MoodHistory(),
+        'views/nav': (context) => MainNav(),
       },
     );
   }

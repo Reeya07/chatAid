@@ -5,15 +5,42 @@ import '../models/mood_log.dart';
 class MoodGraph extends StatelessWidget {
   final List<MoodLog> moodLogs;
 
-  const MoodGraph({super.key, required this.moodLogs});
+  // NEW: notify parent which exercise to open
+  final void Function(String exerciseKey)? onRecommendTap;
 
-  DateTime removeTime(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
+  const MoodGraph({super.key, required this.moodLogs, this.onRecommendTap});
+
+  DateTime removeTime(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
+  static const Color primary = Color(0xFF1E88E5);
+  static const Color secondary = Color(0xFF4FC3F7);
 
   String day(DateTime dt) {
     const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return names[dt.weekday - 1];
+  }
+
+  // NEW: map score -> 2 exercises only
+  String exerciseForScore(double score) {
+    // <=3 => grounding, >3 => breathing (simple + logical)
+    if (score <= 3.0) return "grounding";
+    return "breathing";
+  }
+
+  String exerciseTitle(String key) {
+    if (key == "grounding") return "Grounding exercise";
+    return "Breathing exercise";
+  }
+
+  String friendlyMessage(String key, double weekAvg) {
+    final scoreText = weekAvg.toStringAsFixed(1);
+
+    if (key == "grounding") {
+      return "I noticed this week has been a bit heavy for you (avg $scoreText) 💙 Let’s try a grounding exercise together.";
+    } else {
+      return "You’ve had a mixed week (avg $scoreText) 🌿 A short breathing exercise can help you reset.";
+    }
   }
 
   @override
@@ -46,6 +73,14 @@ class MoodGraph extends StatelessWidget {
       moodPoints.add(FlSpot(dayIndex.toDouble(), averageMood));
       dayIndex++;
     });
+    final allScores = moodPoints.map((e) => e.y).toList();
+    double weekAvg = 3;
+    if (allScores.isNotEmpty) {
+      weekAvg = allScores.reduce((a, b) => a + b) / allScores.length;
+    }
+
+    final recommendedKey = exerciseForScore(weekAvg);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -63,7 +98,13 @@ class MoodGraph extends StatelessWidget {
               minY: 1,
               maxY: 5,
 
-              gridData: FlGridData(show: false),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: secondary.withOpacity(0.18), strokeWidth: 1),
+              ),
+
               borderData: FlBorderData(show: false),
 
               titlesData: FlTitlesData(
@@ -89,10 +130,10 @@ class MoodGraph extends StatelessWidget {
                   sideTitles: SideTitles(
                     showTitles: true,
                     interval: 1,
-                    reservedSize: 1,
+                    reservedSize: 18,
                     getTitlesWidget: (value, meta) {
                       final n = value.toInt();
-                      if (n < 0 || n > 6) return SizedBox.shrink();
+                      if (n < 1 || n > 5) return SizedBox.shrink();
 
                       return Text(n.toString(), style: TextStyle(fontSize: 11));
                     },
@@ -132,15 +173,41 @@ class MoodGraph extends StatelessWidget {
                   spots: moodPoints,
                   isCurved: true,
                   barWidth: 3,
-                  color: Colors.purple,
-                  dotData: FlDotData(show: true),
+                  color: primary,
+                  dotData: FlDotData(
+                    show: true,
+                    getDotPainter: (spot, percent, barData, index) {
+                      return FlDotCirclePainter(
+                        radius: 4,
+                        color: primary,
+                        strokeWidth: 2,
+                        strokeColor: Colors.white,
+                      );
+                    },
+                  ),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: Color.fromRGBO(128, 0, 128, 0.15),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        secondary.withOpacity(0.45),
+                        secondary.withOpacity(0.05),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            title: const Text("A little support for you"),
+            subtitle: Text(friendlyMessage(recommendedKey, weekAvg)),
+            trailing: const Icon(Icons.arrow_forward),
+            onTap: () => onRecommendTap?.call(recommendedKey),
           ),
         ),
       ],

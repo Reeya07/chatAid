@@ -53,7 +53,7 @@ class LoginState extends State<Login> {
         backgroundColor: Colors.green,
       ),
     );
-    Navigator.pushReplacementNamed(context, 'views/dashboard');
+    Navigator.pushReplacementNamed(context, 'views/nav');
   }
 
   //To add anonymous

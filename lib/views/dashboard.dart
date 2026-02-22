@@ -5,6 +5,7 @@ import 'chat.dart';
 import '../controllers/mood_controller.dart';
 import '../models/mood_log.dart';
 import '../widgets/mood_graph.dart';
+import '../views/exercises.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -15,6 +16,8 @@ class Dashboard extends StatefulWidget {
 
 class DashboardState extends State<Dashboard> {
   final MoodController _moodC = MoodController();
+  static const Color primary = Color(0xFF1E88E5); // ocean blue
+  static const Color secondary = Color(0xFF4FC3F7);
 
   String userName() {
     final user = FirebaseAuth.instance.currentUser;
@@ -99,9 +102,9 @@ class DashboardState extends State<Dashboard> {
           height: 44,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.purple, width: 2),
+            border: Border.all(color: primary, width: 2),
           ),
-          child: Icon(Icons.favorite, color: Colors.purple),
+          child: Icon(Icons.favorite, color: primary),
         ),
         SizedBox(width: 12),
         Expanded(
@@ -135,7 +138,7 @@ class DashboardState extends State<Dashboard> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: AlignmentGeometry.bottomRight,
-          colors: [Color.fromARGB(255, 150, 110, 218), Color(0xFF6F8BFF)],
+          colors: [primary, secondary],
         ),
         boxShadow: [
           BoxShadow(
@@ -183,7 +186,7 @@ class DashboardState extends State<Dashboard> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
+                foregroundColor: primary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -230,10 +233,10 @@ class DashboardState extends State<Dashboard> {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: secondary.withOpacity(0.22),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.star_border, size: 18),
+                child: Icon(Icons.star_border, size: 18, color: primary),
               ),
               SizedBox(width: 12),
               Expanded(
@@ -271,10 +274,10 @@ class DashboardState extends State<Dashboard> {
                 child: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: selected ? Colors.purple : Colors.transparent,
+                    color: selected ? primary : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: selected ? Colors.purple : Colors.grey.shade300,
+                      color: selected ? primary : Colors.grey.shade300,
                     ),
                   ),
                   child: Text(emoji, style: TextStyle(fontSize: 26)),
@@ -311,6 +314,7 @@ class DashboardState extends State<Dashboard> {
                 ),
               ),
               TextButton(
+                style: TextButton.styleFrom(foregroundColor: primary),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -322,26 +326,36 @@ class DashboardState extends State<Dashboard> {
             ],
           ),
           SizedBox(height: 10),
-          SizedBox(
-            height: 200,
-            child: StreamBuilder<List<MoodLog>>(
-              stream: _moodC.streamLast7Days(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text("Graph error:${snapshot.error}");
-                }
-                if (!snapshot.hasData) {
-                  return Center(child: Text("Loading graph..."));
-                }
-                final logs = snapshot.data!;
-                if (logs.isEmpty) {
-                  return Center(
-                    child: Text("No mood data yet.Save a mood to see graph."),
+          StreamBuilder<List<MoodLog>>(
+            stream: _moodC.streamLast7Days(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text("Graph error:${snapshot.error}");
+              }
+              if (!snapshot.hasData) {
+                return Center(child: Text("Loading graph..."));
+              }
+              final logs = snapshot.data!;
+              if (logs.isEmpty) {
+                return Center(
+                  child: Text("No mood data yet.Save a mood to see graph."),
+                );
+              }
+
+              //mood graph suggest an exercise as needed
+              return MoodGraph(
+                moodLogs: logs,
+                onRecommendTap: (exerciseKey) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          Exercises(initialExerciseKey: exerciseKey),
+                    ),
                   );
-                }
-                return MoodGraph(moodLogs: logs);
-              },
-            ),
+                },
+              );
+            },
           ),
         ],
       ),
@@ -363,7 +377,7 @@ class DashboardState extends State<Dashboard> {
             margin: EdgeInsets.symmetric(horizontal: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.purple, width: 1.2),
+              border: Border.all(color: primary, width: 1.2),
               color: Colors.white,
             ),
             child: Column(
@@ -373,10 +387,10 @@ class DashboardState extends State<Dashboard> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Color.fromRGBO(128, 0, 128, 0.12),
+                    color: secondary.withOpacity(0.22),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(icon, color: Colors.purple),
+                  child: Icon(icon, color: primary),
                 ),
                 SizedBox(height: 8),
                 Text(label, style: TextStyle(fontSize: 12)),
@@ -410,7 +424,12 @@ class DashboardState extends State<Dashboard> {
             tile(
               icon: Icons.menu_book_outlined,
               label: "Resource",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => Exercises()),
+                );
+              },
             ),
             tile(
               icon: Icons.show_chart,
