@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mental_health_app/controllers/mood_controller.dart';
 import '../controllers/chat_controller.dart';
 import '../models/chat_info.dart';
+import '../controllers/progress_controller.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -15,6 +16,7 @@ class _ChatState extends State<Chat> {
   final Color lightPurple = Color(0xFFF3F0FF);
 
   final TextEditingController _textC = TextEditingController();
+  final ProgressController _progressC = ProgressController();
   final FocusNode focus = FocusNode();
   final List<Chatinfo> _messages = [
     Chatinfo(
@@ -91,6 +93,8 @@ class _ChatState extends State<Chat> {
   Future<void> _send() async {
     final text = _textC.text;
     if (text.isEmpty || _sending) return;
+
+    await _progressC.markDone('chat');
 
     setState(() {
       _sending = true;

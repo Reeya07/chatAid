@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import '../controllers/progress_controller.dart';
 
 class GroundingScreen extends StatefulWidget {
   const GroundingScreen({super.key});
@@ -12,6 +13,8 @@ class GroundingScreen extends StatefulWidget {
 class _GroundingScreenState extends State<GroundingScreen> {
   static const Color navy = Color(0xFF0D3B66);
   static const Color ocean = Color(0xFF1E88E5);
+
+  final ProgressController _progressC = ProgressController();
 
   // Timer
   final List<int> durations = [60, 120, 300, 600];
@@ -387,6 +390,7 @@ class _GroundingScreenState extends State<GroundingScreen> {
       setState(() => stepIndex += 1);
       inputC.clear();
     } else {
+      _progressC.markDone('exercises');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Nice work ✅ You finished the grounding steps."),

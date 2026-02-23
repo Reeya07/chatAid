@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../views/mood_history.dart';
 import 'chat.dart';
 import '../controllers/mood_controller.dart';
+import '../controllers/progress_controller.dart';
 import '../models/mood_log.dart';
 import '../widgets/mood_graph.dart';
 import '../views/exercises.dart';
@@ -16,6 +17,7 @@ class Dashboard extends StatefulWidget {
 
 class DashboardState extends State<Dashboard> {
   final MoodController _moodC = MoodController();
+  final ProgressController _progressC = ProgressController();
   static const Color primary = Color(0xFF1E88E5); // ocean blue
   static const Color secondary = Color(0xFF4FC3F7);
 
@@ -78,6 +80,7 @@ class DashboardState extends State<Dashboard> {
           moodScore: scorelabel(moodLabel),
         ),
       );
+      await _progressC.markDone('mood');
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -90,6 +93,22 @@ class DashboardState extends State<Dashboard> {
     }
     if (!mounted) return;
     setState(() => _saving = false);
+  }
+
+  Widget doneDot(bool done) {
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        color: done ? Colors.green : Colors.grey.shade300,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        done ? Icons.check : Icons.circle,
+        size: done ? 16 : 8,
+        color: done ? Colors.white : Colors.grey.shade500,
+      ),
+    );
   }
 
   Widget topHeader() {
@@ -131,7 +150,7 @@ class DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget chatCard() {
+  Widget chatCard({required bool done}) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
@@ -171,6 +190,7 @@ class DashboardState extends State<Dashboard> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
+              doneDot(done),
             ],
           ),
           SizedBox(height: 12),
@@ -220,7 +240,7 @@ class DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget dailyCheckIn() {
+  Widget dailyCheckIn({required bool done}) {
     return box(
       onTap: null,
       child: Column(
@@ -258,6 +278,7 @@ class DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
+              doneDot(done),
             ],
           ),
           SizedBox(height: 12),
@@ -299,7 +320,7 @@ class DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget moodGraph() {
+  Widget moodGraph({required bool done}) {
     return box(
       onTap: () {},
       child: Column(
@@ -307,12 +328,6 @@ class DashboardState extends State<Dashboard> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  "Your mood this week",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ),
               TextButton(
                 style: TextButton.styleFrom(foregroundColor: primary),
                 onPressed: () {
@@ -323,6 +338,7 @@ class DashboardState extends State<Dashboard> {
                 },
                 child: Text("View insights"),
               ),
+              doneDot(done),
             ],
           ),
           SizedBox(height: 10),
@@ -452,23 +468,32 @@ class DashboardState extends State<Dashboard> {
     return Scaffold(
       backgroundColor: Color(0xFFF6F3FF),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              topHeader(),
-              SizedBox(height: 14),
-              chatCard(),
-              SizedBox(height: 14),
-              dailyCheckIn(),
-              SizedBox(height: 14),
-              moodGraph(),
-              SizedBox(height: 14),
-              quickAccess(),
-              SizedBox(height: 14),
-            ],
-          ),
+        child: StreamBuilder<Map<String, dynamic>>(
+          stream: _progressC.streamTodayProgress(),
+          builder: (context, snapshot) {
+            final progress = snapshot.data ?? {};
+
+            final moodDone = progress['mood'] == true;
+            final chatDone = progress['chat'] == true;
+            return SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  topHeader(),
+                  SizedBox(height: 14),
+                  chatCard(done: chatDone),
+                  SizedBox(height: 14),
+                  dailyCheckIn(done: moodDone),
+                  SizedBox(height: 14),
+                  moodGraph(done: moodDone),
+                  SizedBox(height: 14),
+                  quickAccess(),
+                  SizedBox(height: 14),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

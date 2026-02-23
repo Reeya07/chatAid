@@ -105,7 +105,7 @@ class CbtScreenState extends State<CbtScreen> {
     //if(args != null && thoughtC.text.isEmpty) thoughtC.text= args['initual Thought']??"";
 
     return Scaffold(
-      backgroundColor: Color(0xFFE9E3F3),
+      backgroundColor: Color.fromARGB(255, 142, 210, 241),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -178,7 +178,7 @@ class CbtScreenState extends State<CbtScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "This is just a suggestion-you can change it.",
+                  "This is just a suggestion you can change it.",
                   style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
                 SizedBox(height: 8),
@@ -198,12 +198,12 @@ class CbtScreenState extends State<CbtScreen> {
                         setState(() => _selectedPattern = key);
                         showPattern();
                       },
-                      selectedColor: Color(0xFF7B5BBE),
+                      selectedColor: Color(0xFF1E88E5),
                       labelStyle: TextStyle(
                         color: selected ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.w600,
                       ),
-                      backgroundColor: Color(0XFFF4F2FA),
+                      backgroundColor: Color.fromARGB(255, 142, 210, 241),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(22),
                         side: BorderSide(color: Colors.black12),
@@ -289,7 +289,7 @@ class CbtScreenState extends State<CbtScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F2FA),
+                      color: Color.fromARGB(255, 142, 210, 241),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.black12),
                     ),

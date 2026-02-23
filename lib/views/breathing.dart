@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import '../controllers/progress_controller.dart';
 
 class BreathingScreen extends StatefulWidget {
   const BreathingScreen({super.key});
@@ -14,7 +15,8 @@ class _BreathingScreenState extends State<BreathingScreen>
     with SingleTickerProviderStateMixin {
   static const Color navy = Color(0xFF0D3B66);
   static const Color ocean = Color(0xFF1E88E5);
-  static const Color aqua = Color(0xFF4FC3F7);
+
+  final ProgressController _progressC = ProgressController();
 
   late final AnimationController breathCtrl;
   late final Animation<double> scale;
@@ -260,6 +262,7 @@ class _BreathingScreenState extends State<BreathingScreen>
         });
         stopMusic();
         _resetBreathing();
+        _progressC.markDone('exercises');
 
         ScaffoldMessenger.of(
           context,
