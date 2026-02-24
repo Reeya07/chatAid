@@ -6,6 +6,7 @@ import '../controllers/mood_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../models/mood_log.dart';
 import '../widgets/mood_graph.dart';
+import '../widgets/plant.dart';
 import '../views/exercises.dart';
 
 class Dashboard extends StatefulWidget {
@@ -486,6 +487,8 @@ class DashboardState extends State<Dashboard> {
                   SizedBox(height: 14),
                   dailyCheckIn(done: moodDone),
                   SizedBox(height: 14),
+                  const PlantCard(),
+                  const SizedBox(height: 22),
                   moodGraph(done: moodDone),
                   SizedBox(height: 14),
                   quickAccess(),
