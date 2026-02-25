@@ -35,8 +35,8 @@ class _PlantCardState extends State<PlantCard> {
 
   // Stage thresholds (tweak if you want)
   String plantAsset(int points) {
-    // if (points <= 2) return 'assets/plant/seed.png';
-    //if (points <= 6) return 'assets/plant/plant.png';
+    if (points <= 2) return 'assets/plant/seed.png';
+    if (points <= 6) return 'assets/plant/plant.png';
     return 'assets/plant/bloom.png';
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'views/nav.dart';
 import 'views/mood_history.dart';
 import 'views/login.dart';
@@ -21,7 +22,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 'views/nav',
+
+      // ✅ Auth Gate (fixes dashboard opening with no user)
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // ✅ If logged in
+          if (snapshot.hasData) {
+            return MainNav(); // change to Dashboard() if you prefer
+          }
+
+          // ✅ If not logged in
+          return Login();
+        },
+      ),
       routes: {
         'views/chat': (context) => Chat(),
         'views/login': (context) => Login(),

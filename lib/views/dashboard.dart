@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../views/profile.dart';
 import '../views/mood_history.dart';
-import 'chat.dart';
+import '../views/chat.dart';
+import '../views/exercises.dart';
 import '../controllers/mood_controller.dart';
 import '../controllers/progress_controller.dart';
+import '../controllers/user_controller.dart';
 import '../models/mood_log.dart';
+import '../models/user.dart';
 import '../widgets/mood_graph.dart';
 import '../widgets/plant.dart';
-import '../views/exercises.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -19,6 +22,7 @@ class Dashboard extends StatefulWidget {
 class DashboardState extends State<Dashboard> {
   final MoodController _moodC = MoodController();
   final ProgressController _progressC = ProgressController();
+  final UserController _userC = UserController();
   static const Color primary = Color(0xFF1E88E5); // ocean blue
   static const Color secondary = Color(0xFF4FC3F7);
 
@@ -113,41 +117,54 @@ class DashboardState extends State<Dashboard> {
   }
 
   Widget topHeader() {
-    final name = userName();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: primary, width: 2),
-          ),
-          child: Icon(Icons.favorite, color: primary),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Hi $name,Welcome to your",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+    return StreamBuilder<AppUser>(
+      stream: _userC.appUserStream(),
+      builder: (context, snapshot) {
+        final name = snapshot.data?.name ?? "User";
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hi, $name 👋",
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Welcome back to your safe space",
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(width: 12),
-        Text(
-          "Mental Health Companion",
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-      ],
+            ),
+            InkWell(
+              borderRadius: BorderRadius.circular(30),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primary.withOpacity(0.12),
+                ),
+                child: Icon(Icons.account_circle, color: primary, size: 26),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -468,6 +485,7 @@ class DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F3FF),
+
       body: SafeArea(
         child: StreamBuilder<Map<String, dynamic>>(
           stream: _progressC.streamTodayProgress(),
@@ -487,8 +505,8 @@ class DashboardState extends State<Dashboard> {
                   SizedBox(height: 14),
                   dailyCheckIn(done: moodDone),
                   SizedBox(height: 14),
-                  const PlantCard(),
-                  const SizedBox(height: 22),
+                  PlantCard(),
+                  SizedBox(height: 22),
                   moodGraph(done: moodDone),
                   SizedBox(height: 14),
                   quickAccess(),
