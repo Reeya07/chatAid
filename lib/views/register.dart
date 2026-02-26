@@ -91,19 +91,12 @@ class RegisterState extends State<Register> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 80,
+                SizedBox(
+                  width: 150,
                   height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFD3A84), Color(0xFF4A79FF)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.favorite,
-                    color: Colors.white,
-                    size: 40,
+                  child: Image.asset(
+                    'assets/image/logo.png',
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -112,13 +105,16 @@ class RegisterState extends State<Register> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color.fromARGB(255, 4, 108, 193),
                   ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   'Your Mental Wellness companion',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color.fromARGB(255, 0, 140, 254),
+                  ),
                 ),
                 const SizedBox(height: 28),
                 //white form
@@ -152,7 +148,7 @@ class RegisterState extends State<Register> {
                                 style: TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF9C40FF),
+                                  color: Color(0xFF1E88E5),
                                 ),
                               ),
                             ),
@@ -290,8 +286,8 @@ class RegisterState extends State<Register> {
                                     borderRadius: BorderRadius.circular(24),
                                     gradient: const LinearGradient(
                                       colors: [
-                                        Color(0xFF4A79FF),
-                                        Color(0xFFB146FF),
+                                        Color(0xFF1565C0),
+                                        Color(0xFF42A5F5),
                                       ],
                                     ),
                                   ),

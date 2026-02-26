@@ -8,6 +8,8 @@ import 'views/register.dart';
 import 'views/chat.dart';
 import 'views/dashboard.dart';
 import 'views/cbt_screen.dart';
+import 'views/journal.dart';
+import 'views/journal_history.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +52,8 @@ class MyApp extends StatelessWidget {
         'views/CbtScreen': (context) => CbtScreen(),
         'views/moodHistory': (context) => MoodHistory(),
         'views/nav': (context) => MainNav(),
+        'views/journal': (context) => const JournalScreen(),
+        'views/journalHistory': (context) => JournalHistoryScreen(),
       },
     );
   }

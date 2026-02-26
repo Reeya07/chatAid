@@ -4,6 +4,7 @@ import '../views/profile.dart';
 import '../views/mood_history.dart';
 import '../views/chat.dart';
 import '../views/exercises.dart';
+import '../views/journal.dart';
 import '../controllers/mood_controller.dart';
 import '../controllers/progress_controller.dart';
 import '../controllers/user_controller.dart';
@@ -472,6 +473,16 @@ class DashboardState extends State<Dashboard> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => MoodHistory()),
+                );
+              },
+            ),
+            tile(
+              icon: Icons.edit_note_rounded,
+              label: "Journal",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => JournalScreen()),
                 );
               },
             ),

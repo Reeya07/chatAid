@@ -129,34 +129,30 @@ class LoginState extends State<Login> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFD3A84), Color(0xFF4A79FF)],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.favorite,
-                    color: Colors.white,
-                    size: 40,
+                SizedBox(
+                  width: 200,
+                  height: 150,
+                  child: Image.asset(
+                    'assets/image/logo.png',
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 1),
                 const Text(
                   'ChatAid',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color.fromARGB(255, 4, 108, 193),
                   ),
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   'Your Mental Wellness companion',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color.fromARGB(255, 0, 140, 254),
+                  ),
                 ),
                 const SizedBox(height: 28),
                 //white form
@@ -170,7 +166,7 @@ class LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(26),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black, //TO ADD OPACITY
+                            color: Colors.black,
                             blurRadius: 18,
                             offset: const Offset(0, 8),
                           ),
@@ -190,7 +186,7 @@ class LoginState extends State<Login> {
                                 style: TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF9C40FF),
+                                  color: Color(0xFF1E88E5),
                                 ),
                               ),
                             ),
@@ -271,8 +267,8 @@ class LoginState extends State<Login> {
                                     borderRadius: BorderRadius.circular(24),
                                     gradient: const LinearGradient(
                                       colors: [
-                                        Color(0xFF4A79FF),
-                                        Color(0xFFB146FF),
+                                        Color(0xFF1565C0),
+                                        Color(0xFF42A5F5),
                                       ],
                                     ),
                                   ),
@@ -307,14 +303,14 @@ class LoginState extends State<Login> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
                                   ),
-                                  side: BorderSide(color: Color(0xFFB146FF)),
+                                  side: BorderSide(color: Color(0xFF1E88E5)),
                                 ),
                                 child: Text(
                                   'Enter Anonymously',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFFB146FF),
+                                    color: Color(0xFF1E88E5),
                                   ),
                                 ),
                               ),
@@ -324,7 +320,7 @@ class LoginState extends State<Login> {
                               onPressed: resetPassword,
                               child: Text(
                                 'Forgot Password?',
-                                style: TextStyle(color: Color(0xFFB146FF)),
+                                style: TextStyle(color: Color(0xFF1E88E5)),
                               ),
                             ),
                           ],

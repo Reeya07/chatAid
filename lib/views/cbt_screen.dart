@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mental_health_app/controllers/cbt_controller.dart';
+import 'package:mental_health_app/models/cbt_log.dart';
+import 'package:mental_health_app/views/grounding.dart';
 import '../utils/thinking_pattern_detector.dart';
+import 'breathing.dart';
 
 class CbtScreen extends StatefulWidget {
-  const CbtScreen({super.key});
+  final String? initialThought;
+  final String? journalId;
+  final String? cbtId; // if opening an existing record
+
+  const CbtScreen({super.key, this.initialThought, this.journalId, this.cbtId});
 
   @override
   State<CbtScreen> createState() => CbtScreenState();
@@ -15,6 +22,8 @@ class CbtScreenState extends State<CbtScreen> {
   final TextEditingController evidenceC = TextEditingController();
   final TextEditingController adviceC = TextEditingController();
   final CbtController cbt = CbtController();
+  String? _cbtId;
+  bool _saving = false;
 
   bool _loading = false;
   String balancedText = "";
@@ -50,6 +59,53 @@ class CbtScreenState extends State<CbtScreen> {
     evidenceC.dispose();
     adviceC.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _cbtId = widget.cbtId;
+
+    if (widget.initialThought != null && widget.initialThought!.isNotEmpty) {
+      thoughtC.text = widget.initialThought!;
+      final result = detectPattern(widget.initialThought!);
+      if (result.confidence >= 0.8) _selectedPattern = result.label;
+    }
+
+    _ensureDoc();
+  }
+
+  Future<void> _ensureDoc() async {
+    if (_cbtId != null) return;
+
+    final log = CbtLog.empty(
+      journalId: widget.journalId,
+      initialThought: widget.initialThought ?? "",
+    );
+
+    try {
+      final id = await cbt.create(log);
+      if (!mounted) return;
+      setState(() => _cbtId = id);
+    } catch (_) {
+      // still allow CBT usage even if save fails
+    }
+  }
+
+  CbtLog _buildLog({required bool done}) {
+    return CbtLog(
+      journalId: widget.journalId,
+      situation: situationC.text,
+      thought: thoughtC.text,
+      thinkingPattern: _selectedPattern,
+      evidenceFor: evidenceC.text,
+      advice: adviceC.text,
+      balancedThought: balancedText,
+      beforeIntensity: before.round(),
+      afterIntensity: after.round(),
+      done: done,
+    );
   }
 
   void showPattern() {
@@ -98,12 +154,63 @@ class CbtScreenState extends State<CbtScreen> {
     );
   }
 
+  Widget _buildExerciseSuggestion() {
+    final b = before.round();
+    final a = after.round();
+
+    if (a >= 4) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          const Text(
+            "It still feels pretty intense. Want a quick grounding exercise?",
+            style: TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GroundingScreen()),
+              );
+            },
+            icon: const Icon(Icons.self_improvement),
+            label: const Text("Do grounding (2 min)"),
+          ),
+        ],
+      );
+    }
+
+    if (a < b) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          const Text(
+            "Nice — it’s lighter now. Want to lock this calm in with breathing?",
+            style: TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BreathingScreen()),
+              );
+            },
+            icon: const Icon(Icons.air),
+            label: const Text("Do breathing (60s)"),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox(); // nothing if no condition met
+  }
+
   @override
   Widget build(BuildContext context) {
-    //if pass chat later
-    //final args = ModalRoute.of(context)?.setting.arguments as Map?;
-    //if(args != null && thoughtC.text.isEmpty) thoughtC.text= args['initual Thought']??"";
-
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 142, 210, 241),
       appBar: AppBar(
@@ -246,7 +353,9 @@ class CbtScreenState extends State<CbtScreen> {
               children: [
                 Text(
                   "Next,we'll generate a kinder and more balanced way to say this.",
-                  style: TextStyle(color: Colors.black87),
+                  style: TextStyle(
+                    color: const Color.fromARGB(221, 87, 157, 243),
+                  ),
                 ),
                 SizedBox(height: 10),
                 ElevatedButton(
@@ -270,6 +379,11 @@ class CbtScreenState extends State<CbtScreen> {
                               _loading = false;
                               balancedText = result;
                             });
+                            //saving to firestore for journal
+                            final id = _cbtId;
+                            if (id != null) {
+                              await cbt.update(id, _buildLog(done: false));
+                            }
                           } catch (e) {
                             if (!mounted) return;
                             setState(() => _loading = false);
@@ -323,6 +437,37 @@ class CbtScreenState extends State<CbtScreen> {
                     "Summary:${before.round()}->${after.round()}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
+
+                  _buildExerciseSuggestion(),
+                  const SizedBox(height: 14),
+                  ElevatedButton.icon(
+                    onPressed: _saving
+                        ? null
+                        : () async {
+                            final id = _cbtId;
+                            if (id == null) return;
+
+                            setState(() => _saving = true);
+                            try {
+                              await cbt.update(id, _buildLog(done: true));
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Saved ✅")),
+                              );
+                              Navigator.pop(context);
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Error: $e")),
+                              );
+                            } finally {
+                              if (mounted) setState(() => _saving = false);
+                            }
+                          },
+                    icon: const Icon(Icons.save),
+                    label: Text(_saving ? "Saving..." : "Save CBT Reflection"),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

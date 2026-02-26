@@ -3,6 +3,7 @@ import 'dashboard.dart';
 import 'chat.dart';
 import 'exercises.dart';
 import 'mood_history.dart';
+import 'journal.dart';
 
 class MainNav extends StatefulWidget {
   const MainNav({super.key});
@@ -14,7 +15,13 @@ class MainNav extends StatefulWidget {
 class _MainNavState extends State<MainNav> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [Dashboard(), Chat(), Exercises(), MoodHistory()];
+  final List<Widget> _pages = [
+    Dashboard(),
+    Chat(),
+    Exercises(),
+    MoodHistory(),
+    JournalScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +53,10 @@ class _MainNavState extends State<MainNav> {
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
             label: "Tracker",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.edit_note_rounded),
+            label: "Journal",
           ),
         ],
       ),

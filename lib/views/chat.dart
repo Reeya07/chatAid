@@ -12,8 +12,8 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  final Color primaryPurple = Color(0xFF7C6AED);
-  final Color lightPurple = Color(0xFFF3F0FF);
+  final Color primary = Color(0xFF1E88E5);
+  final Color light = Color.fromARGB(255, 138, 187, 251);
 
   final TextEditingController _textC = TextEditingController();
   final ProgressController _progressC = ProgressController();
@@ -72,7 +72,7 @@ class _ChatState extends State<Chat> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryPurple,
+              backgroundColor: primary,
               foregroundColor: Colors.white,
             ),
             child: Text('Try CBT'),
@@ -124,7 +124,7 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE9E3F3),
+      backgroundColor: Color.fromARGB(255, 193, 223, 249),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -135,7 +135,7 @@ class _ChatState extends State<Chat> {
         titleSpacing: 0,
         title: Row(
           children: [
-            Icon(Icons.smart_toy_outlined, color: primaryPurple),
+            Icon(Icons.smart_toy_outlined, color: primary),
             SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +183,7 @@ class _ChatState extends State<Chat> {
                       child: Icon(
                         Icons.smart_toy_outlined,
                         size: 22,
-                        color: primaryPurple,
+                        color: primary,
                       ),
                     ),
                     Align(
@@ -202,11 +202,11 @@ class _ChatState extends State<Chat> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: isUser ? primaryPurple : Colors.white,
+                            color: isUser ? primary : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black,
                                 blurRadius: 6,
                                 offset: Offset(0, 3),
                               ),
@@ -261,11 +261,9 @@ class _ChatState extends State<Chat> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: primaryPurple,
+                        color: primary,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: primaryPurple.withOpacity(0.3),
-                        ),
+                        border: Border.all(color: primary),
                       ),
                       child: _sending
                           ? const Padding(
