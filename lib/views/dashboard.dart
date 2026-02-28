@@ -12,6 +12,7 @@ import '../models/mood_log.dart';
 import '../models/user.dart';
 import '../widgets/mood_graph.dart';
 import '../widgets/plant.dart';
+import '../widgets/emergencyButton.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -496,6 +497,7 @@ class DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F3FF),
+      floatingActionButton: const EmergencyFab(),
 
       body: SafeArea(
         child: StreamBuilder<Map<String, dynamic>>(

@@ -123,7 +123,17 @@ class _JournalScreenState extends State<JournalScreen> {
                   Row(
                     children: [
                       IconButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.pop(context);
+                          } else {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              'views/nav',
+                              (route) => false,
+                            );
+                          }
+                        },
                         icon: const Icon(Icons.arrow_back_ios_new_rounded),
                         color: Colors.white,
                       ),
