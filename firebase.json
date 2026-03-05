@@ -1,16 +1,1 @@
-{
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "disallowLegacyRuntimeConfig": true,
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ]
-    }
-  ]
-}
+{"functions":[{"source":"functions","codebase":"default","disallowLegacyRuntimeConfig":true,"ignore":["node_modules",".git","firebase-debug.log","firebase-debug.*.log","*.local"]}],"flutter":{"platforms":{"android":{"default":{"projectId":"mentalhealthapp-a86e3","appId":"1:688257271856:android:6c0b22199d0359ada505f5","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"mentalhealthapp-a86e3","configurations":{"android":"1:688257271856:android:6c0b22199d0359ada505f5","ios":"1:688257271856:ios:1d6f4b0e992e6264a505f5","macos":"1:688257271856:ios:1d6f4b0e992e6264a505f5","web":"1:688257271856:web:2670c3d8aef69b02a505f5","windows":"1:688257271856:web:b394cbd1d9e870c4a505f5"}}}}}}

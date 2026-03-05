@@ -5,7 +5,6 @@ import '../models/mood_log.dart';
 class MoodGraph extends StatelessWidget {
   final List<MoodLog> moodLogs;
 
-  // NEW: notify parent which exercise to open
   final void Function(String exerciseKey)? onRecommendTap;
 
   const MoodGraph({super.key, required this.moodLogs, this.onRecommendTap});
@@ -21,9 +20,7 @@ class MoodGraph extends StatelessWidget {
     return names[dt.weekday - 1];
   }
 
-  // NEW: map score -> 2 exercises only
   String exerciseForScore(double score) {
-    // <=3 => grounding, >3 => breathing (simple + logical)
     if (score <= 3.0) return "grounding";
     return "breathing";
   }

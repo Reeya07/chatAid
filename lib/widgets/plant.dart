@@ -14,7 +14,6 @@ class _PlantCardState extends State<PlantCard> {
   bool loading = true;
   int growthPoints = 0;
   String lastWatered = "";
-  bool todaySelfCareDone = false;
 
   @override
   void initState() {
@@ -23,14 +22,23 @@ class _PlantCardState extends State<PlantCard> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() => loading = true);
-    final data = await plantCtrl.getPlantData();
-    setState(() {
-      growthPoints = data['growthPoints'] as int;
-      lastWatered = data['lastWatered'] as String;
-      todaySelfCareDone = data['todaySelfCareDone'] as bool;
-      loading = false;
-    });
+
+    try {
+      final data = await plantCtrl.getPlantData();
+
+      if (!mounted) return;
+      setState(() {
+        growthPoints = (data['growthPoints'] ?? 0) as int;
+        lastWatered = (data['lastWatered'] ?? '') as String;
+      });
+    } catch (e) {
+      // optional: handle error
+    } finally {
+      if (!mounted) return;
+      setState(() => loading = false);
+    }
   }
 
   // Stage thresholds (tweak if you want)
@@ -43,7 +51,7 @@ class _PlantCardState extends State<PlantCard> {
   String plantMessage(int points) {
     if (points <= 2) return "Small steps still count.";
     if (points <= 6) return "You're growing with consistency.";
-    return "Look at you — you kept going.";
+    return "Look at you, you kept going.";
   }
 
   @override

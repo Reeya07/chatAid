@@ -3,6 +3,7 @@ import 'package:mental_health_app/controllers/mood_controller.dart';
 import '../controllers/chat_controller.dart';
 import '../models/chat_info.dart';
 import '../controllers/progress_controller.dart';
+import '../views/exercises.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -15,6 +16,7 @@ class _ChatState extends State<Chat> {
   final Color primary = Color(0xFF1E88E5);
   final Color light = Color.fromARGB(255, 138, 187, 251);
 
+  Map<String, dynamic>? _lastRec;
   final TextEditingController _textC = TextEditingController();
   final ProgressController _progressC = ProgressController();
   final FocusNode focus = FocusNode();
@@ -26,8 +28,31 @@ class _ChatState extends State<Chat> {
     ),
   ];
 
-  final ChatController _chat = ChatController(baseUrl: 'http://127.0.0.1:3000');
+  final ChatController _chat = ChatController(
+    baseUrl: 'https://chataid-backend.onrender.com',
+  );
   bool _sending = false;
+
+  Future<void> _openRecommendedExercise(String exerciseId) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Exercises(initialExerciseKey: exerciseId),
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _messages.add(
+        Chatinfo(
+          role: 'assistant',
+          text: "Welcome back How are you feeling now?",
+        ),
+      );
+    });
+
+    FocusScope.of(context).requestFocus(focus);
+  }
 
   @override
   void dispose() {
@@ -44,46 +69,137 @@ class _ChatState extends State<Chat> {
   }
 
   Widget quickAction({required String assistantText}) {
-    final lasUser = userMessage();
-    final thoughToUse = lasUser.isNotEmpty ? lasUser : assistantText;
+    final lastUser = userMessage();
+    final thoughtToUse = lastUser.isNotEmpty ? lastUser : assistantText;
+
+    final rec = _lastRec; // Map<String, dynamic>? stored from backend
+    final String recType = rec?['type']?.toString() ?? 'chat';
+    final String recLabel = rec?['label']?.toString() ?? '💬 Continue chatting';
+    final String recId = rec?['id']?.toString() ?? ''; // breathing / grounding
+    final String recThought = (rec?['initialThought']?.toString() ?? '').trim();
+    final String journalPrompt = (rec?['journalPrompt']?.toString() ?? '')
+        .trim();
+
+    Future<void> handleRecommendation() async {
+      if (recType == 'exercise') {
+        final id = recId.isNotEmpty ? recId : 'breathing';
+        await _openRecommendedExercise(id);
+        return;
+      }
+
+      if (recType == 'cbt') {
+        final thought = recThought.isNotEmpty ? recThought : thoughtToUse;
+        Navigator.pushNamed(
+          context,
+          'views/CbtScreen',
+          arguments: {'initialThought': thought},
+        );
+        return;
+      }
+
+      if (recType == 'journal') {
+        Navigator.pushNamed(
+          context,
+          'views/journal',
+          arguments: {'prompt': journalPrompt},
+        );
+        setState(() {
+          _messages.add(
+            Chatinfo(
+              role: 'assistant',
+              text: journalPrompt.isNotEmpty
+                  ? "Quick journal prompt \n$journalPrompt"
+                  : "Quick journal prompt \nWrite what’s on your mind right now.",
+            ),
+          );
+        });
+        FocusScope.of(context).requestFocus(focus);
+        return;
+      }
+
+      // chat
+      FocusScope.of(context).requestFocus(focus);
+    }
+
+    Widget chip({
+      required String label,
+      required VoidCallback onTap,
+      bool filled = false,
+    }) {
+      return InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: filled ? primary : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: primary.withOpacity(0.35)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: filled ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Small helper text so the “smartness” is visible
+    final String hint = rec?['reason']?.toString() ?? "Suggested next step:";
 
     return Padding(
-      padding: EdgeInsets.only(left: 30, right: 8, bottom: 12),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          OutlinedButton(
-            onPressed: () {
-              FocusScope.of(context).requestFocus(focus);
-            },
-            child: Text("Continue chatting"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                'views/CbtScreen',
-                arguments: {
-                  'initialThought': thoughToUse,
-                  //can add situation later:
-                  //'initialSituation':'',
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: Colors.white,
+          const SizedBox(height: 4),
+          Text(
+            hint,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
-            child: Text('Try CBT'),
           ),
-          OutlinedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text("Exercises coming soon")));
-            },
-            child: Text("Try Exercise"),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              // ⭐ Recommended action (highlighted)
+              chip(
+                label: recLabel,
+                filled: true,
+                onTap: () async => await handleRecommendation(),
+              ),
+
+              chip(
+                label: "🧠 Explore CBT",
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    'views/CbtScreen',
+                    arguments: {'initialThought': thoughtToUse},
+                  );
+                },
+              ),
+              chip(
+                label: "🌿 Exercises",
+                onTap: () async {
+                  // Opens list normally (no auto exercise)
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const Exercises()),
+                  );
+                  if (!mounted) return;
+                  FocusScope.of(context).requestFocus(focus);
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -104,12 +220,14 @@ class _ChatState extends State<Chat> {
     try {
       final result = await _chat.sendMessage(text);
       final reply = result['reply'].toString();
+      final rec = result['recommendation'] as Map<String, dynamic>?;
 
       await MoodController().tickChatUsed();
 
       if (!mounted) return;
       setState(() {
         _messages.add(Chatinfo(role: 'assistant', text: reply));
+        _lastRec = rec;
       });
     } catch (e) {
       if (!mounted) return;
@@ -129,7 +247,14 @@ class _ChatState extends State<Chat> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              // fallback if it's root
+              Navigator.pushReplacementNamed(context, 'views/nav');
+            }
+          },
           icon: Icon(Icons.arrow_back, color: Colors.black),
         ),
         titleSpacing: 0,

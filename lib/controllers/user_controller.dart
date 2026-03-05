@@ -20,7 +20,6 @@ class UserController {
 
     return _db.collection('users').doc(user.uid).snapshots().map((doc) {
       final data = doc.data() ?? {};
-      // fallback: if name missing, use email prefix
       final email = (data['email'] ?? user.email ?? '').toString();
       final name = (data['name'] ?? '').toString().trim();
       final fallbackName = email.contains('@')

@@ -49,7 +49,6 @@ class DashboardState extends State<Dashboard> {
     {"emoji": "😢", "label": "sad"},
     {"emoji": "😡", "label": "angry"},
   ];
-
   int scorelabel(String label) {
     switch (label) {
       case "happy":

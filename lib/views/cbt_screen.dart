@@ -188,7 +188,7 @@ class CbtScreenState extends State<CbtScreen> {
         children: [
           const SizedBox(height: 10),
           const Text(
-            "Nice — it’s lighter now. Want to lock this calm in with breathing?",
+            "Nice,it’s lighter now. Want to lock this calm in with breathing?",
             style: TextStyle(fontSize: 13),
           ),
           const SizedBox(height: 8),
@@ -251,12 +251,14 @@ class CbtScreenState extends State<CbtScreen> {
               ),
               onChanged: (text) {
                 final result = detectPattern(text);
-
-                if (result.confidence >= 0.8) {
-                  setState(() {
-                    _selectedPattern = result.label;
-                  });
-                }
+                debugPrint("TEXT: $text");
+                debugPrint(
+                  "PATTERN: ${result.label} | conf=${result.confidence}",
+                );
+                //if (result.confidence >= 0.8) {
+                setState(() {
+                  _selectedPattern = result.label;
+                });
               },
             ),
           ),

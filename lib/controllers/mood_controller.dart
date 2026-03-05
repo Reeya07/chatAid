@@ -8,18 +8,19 @@ class MoodController {
 
   Future<void> saveMoodLog(MoodLog log) async {
     final uid = _auth.currentUser?.uid;
+
     if (uid == null) throw Exception("User not logged in");
 
     await _database.collection("users").doc(uid).collection("mood_logs").add({
       ...log.toMap(),
-      "createdAt": FieldValue.serverTimestamp(),
+      "createdAt": Timestamp.now(),
     });
     await tickMoodLogged();
   }
 
   Stream<List<MoodLog>> streamLast7Days() {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) return const Stream.empty();
+    if (uid == null) return Stream.value(<MoodLog>[]);
 
     final now = DateTime.now();
     final start = DateTime(

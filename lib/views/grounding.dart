@@ -324,7 +324,7 @@ class _GroundingScreenState extends State<GroundingScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text("Grounding complete ✅")));
+        ).showSnackBar(const SnackBar(content: Text("Grounding complete ")));
         return;
       }
 
@@ -393,7 +393,7 @@ class _GroundingScreenState extends State<GroundingScreen> {
       _progressC.markDone('exercises');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Nice work ✅ You finished the grounding steps."),
+          content: Text("Nice work  You finished the grounding steps."),
         ),
       );
     }

@@ -10,10 +10,12 @@ import 'views/dashboard.dart';
 import 'views/cbt_screen.dart';
 import 'views/journal.dart';
 import 'views/journal_history.dart';
+import 'services/encrypt.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await CryptoService.instance.init();
   runApp(const MyApp());
 }
 
@@ -24,8 +26,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      // ✅ Auth Gate (fixes dashboard opening with no user)
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -34,13 +34,9 @@ class MyApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
-
-          // ✅ If logged in
           if (snapshot.hasData) {
-            return MainNav(); // change to Dashboard() if you prefer
+            return MainNav();
           }
-
-          // ✅ If not logged in
           return Login();
         },
       ),
@@ -52,7 +48,7 @@ class MyApp extends StatelessWidget {
         'views/CbtScreen': (context) => CbtScreen(),
         'views/moodHistory': (context) => MoodHistory(),
         'views/nav': (context) => MainNav(),
-        'views/journal': (context) => const JournalScreen(),
+        'views/journal': (context) => JournalScreen(),
         'views/journalHistory': (context) => JournalHistoryScreen(),
       },
     );

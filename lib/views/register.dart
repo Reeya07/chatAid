@@ -57,7 +57,7 @@ class RegisterState extends State<Register> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pushReplacementNamed(context, 'views/dashbaord');
+      Navigator.pushReplacementNamed(context, 'views/nav');
       nameC.clear();
       emailC.clear();
       passwordC.clear();
@@ -297,7 +297,7 @@ class RegisterState extends State<Register> {
                                             width: 20,
                                             height: 20,
                                             child: CircularProgressIndicator(
-                                              strokeWidth: 20,
+                                              strokeWidth: 10,
                                               color: Colors.white,
                                             ),
                                           )

@@ -246,7 +246,7 @@ class _JournalScreenState extends State<JournalScreen> {
                                     ),
                                     decoration: const InputDecoration(
                                       hintText:
-                                          "Type here…\n\n(Everything is saved safely. Nothing is deleted.)",
+                                          "Type here…\n\n(Everything is saved safely. )",
                                       hintStyle: TextStyle(
                                         color: Colors.white60,
                                         height: 1.4,
@@ -321,7 +321,6 @@ class _JournalScreenState extends State<JournalScreen> {
 
                         const SizedBox(height: 10),
 
-                        // ✅ Pretty CBT button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(

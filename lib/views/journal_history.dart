@@ -104,7 +104,6 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE3F2FD), // very light ocean
@@ -148,25 +147,23 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
 
           final List<JournalLog> filteredEntries = allEntries.where((entry) {
             final DateTime? entryDate = entry.createdAt?.toDate();
-            if (entryDate == null) return false;
-
+            if (entryDate == null) {
+              return selectedMonth == null && selectedDate == null;
+            }
             if (selectedMonth != null) {
               if (entryDate.year != selectedMonth!.year ||
                   entryDate.month != selectedMonth!.month) {
                 return false;
               }
             }
-
             if (selectedDate != null) {
               if (!isSameDay(entryDate, selectedDate!)) return false;
             }
-
             if (searchText.isNotEmpty) {
               if (!entry.text.toLowerCase().contains(searchText)) {
                 return false;
               }
             }
-
             return true;
           }).toList();
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/chat_info.dart';
@@ -11,37 +12,69 @@ class ChatController {
 
   ChatController({required this.baseUrl});
 
-  Future<String> _userid() async {
+  String _uid() {
     final user = auth.currentUser;
-    if (user != null) return user.uid;
-
-    final cred = await auth.signInAnonymously();
-    return cred.user!.uid;
+    if (user == null) {
+      throw Exception("User not logged in. Please login again.");
+    }
+    return user.uid;
   }
 
   Future<Map<String, dynamic>> sendMessage(String message) async {
-    final uid = await _userid();
-    final url = Uri.parse('$baseUrl/chat');
+    final uid = _uid();
 
+    // 1) Save USER message first (always)
+    await chatRep.saveMessage(
+      uid,
+      Chatinfo(role: 'user', text: message, createdAt: Timestamp.now()),
+    );
+
+    // 2) Call backend
+    final url = Uri.parse('$baseUrl/chat');
     final res = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'message': message}),
     );
+
     if (res.statusCode != 200) {
+      await chatRep.saveMessage(
+        uid,
+        Chatinfo(
+          role: 'assistant',
+          text: "Sorry, I'm having trouble responding right now.",
+          createdAt: Timestamp.now(),
+        ),
+      );
       throw Exception('Backend error: ${res.body}');
     }
-    final data = jsonDecode(res.body) as Map<String, dynamic>;
-    final reply = data['reply'];
-    final emotion = data['emotion'];
-    final score = data['score']?.toDouble();
 
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    final reply = (data['reply'] ?? "").toString();
+    final emotion = data['emotion']?.toString();
+    final score = (data['score'] is num)
+        ? (data['score'] as num).toDouble()
+        : null;
+    final rec = data['recommendation'] as Map<String, dynamic>?;
+
+    // 3) Save BOT reply
     await chatRep.saveMessage(
       uid,
-      Chatinfo(role: 'user', text: message, emotion: emotion, score: score),
+      Chatinfo(
+        role: 'assistant',
+        text: reply,
+        emotion: emotion,
+        score: score,
+        createdAt: Timestamp.now(),
+      ),
     );
-    await chatRep.saveMessage(uid, Chatinfo(role: 'assistant', text: reply));
-    return {'reply': reply, 'emotion': emotion, 'score': score};
+
+    return {
+      'reply': reply,
+      'emotion': emotion,
+      'score': score,
+      'recommendation': rec,
+    };
   }
 
   Future<Map<String, dynamic>> reframeThought({
@@ -62,9 +95,12 @@ class ChatController {
         "advice": advice,
       }),
     );
+
     if (response.statusCode != 200) {
-      throw Exception("Failed to reframe");
+      throw Exception("Failed to reframe: ${response.body}");
     }
-    return jsonEncode(response.body) as Map<String, dynamic>;
+
+    // FIX: you were jsonEncoding a string (wrong)
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }

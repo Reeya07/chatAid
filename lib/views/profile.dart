@@ -17,6 +17,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    // Not logged in at all
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Profile")),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, 'views/login');
+            },
+            child: const Text("Log in"),
+          ),
+        ),
+      );
+    }
+
+    // Anonymous user -> show login button instead of profile
+    if (user.isAnonymous) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Profile")),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("You’re using guest mode."),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, 'views/login');
+                },
+                child: const Text("Log in to save your data"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    'views/login',
+                    (r) => false,
+                  );
+                },
+                child: const Text("Exit guest"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F3FF),
       appBar: AppBar(
@@ -42,7 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 👤 User Card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
