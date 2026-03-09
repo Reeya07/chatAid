@@ -122,6 +122,14 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Error loading thoughts: ${snapshot.error}",
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
 
           final List<JournalLog> allEntries = snapshot.data ?? [];
 
@@ -129,6 +137,7 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
             return const Center(
               child: Text(
                 "No thoughts yet 🫧",
+
                 style: TextStyle(color: Colors.black54),
               ),
             );

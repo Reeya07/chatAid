@@ -53,12 +53,22 @@ class JournalController {
 
           for (final d in snap.docs) {
             final data = d.data();
+            String text = "";
 
-            final enc = (data["textEnc"] ?? "") as String;
+            try {
+              final enc = (data["textEnc"] ?? "") as String;
 
-            final String text = enc.isEmpty
-                ? ((data["text"] ?? "") as String) // old docs fallback
-                : await CryptoService.instance.decryptString(enc);
+              if (enc.isNotEmpty) {
+                text = await CryptoService.instance.decryptString(enc);
+              } else {
+                text = (data["text"] ?? "") as String;
+              }
+            } catch (e) {
+              print("Decryption failed for doc ${d.id}: $e");
+
+              // fallback text instead of crashing whole screen
+              text = "[Unable to decrypt this journal entry]";
+            }
 
             list.add(
               JournalLog(
