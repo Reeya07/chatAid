@@ -1,3 +1,3 @@
 class SecurityConfig {
-  static const bool encryptionEnabled = false;
+  static const bool encryptionEnabled = true;
 }
