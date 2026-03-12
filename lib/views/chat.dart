@@ -86,6 +86,10 @@ class _ChatState extends State<Chat> {
         await _openRecommendedExercise(id);
         return;
       }
+      if (recType == 'support') {
+        Navigator.pushNamed(context, 'views/emergency');
+        return;
+      }
 
       if (recType == 'cbt') {
         final thought = recThought.isNotEmpty ? recThought : thoughtToUse;
