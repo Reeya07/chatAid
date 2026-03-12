@@ -4,6 +4,7 @@ import '../controllers/chat_controller.dart';
 import '../models/chat_info.dart';
 import '../controllers/progress_controller.dart';
 import '../views/exercises.dart';
+import '../views/emergency.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -29,7 +30,7 @@ class _ChatState extends State<Chat> {
   ];
 
   final ChatController _chat = ChatController(
-    baseUrl: 'https://chataid-backend-production.up.railway.app',
+    baseUrl: 'https://chataid-backend.onrender.com',
   );
   bool _sending = false;
 
@@ -87,7 +88,10 @@ class _ChatState extends State<Chat> {
         return;
       }
       if (recType == 'support') {
-        Navigator.pushNamed(context, 'views/emergency');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const EmergencyScreen()),
+        );
         return;
       }
 
