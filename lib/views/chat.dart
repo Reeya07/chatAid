@@ -29,7 +29,7 @@ class _ChatState extends State<Chat> {
   ];
 
   final ChatController _chat = ChatController(
-    baseUrl: 'https://chataid-backend.onrender.com',
+    baseUrl: 'https://chataid-backend-production.up.railway.app',
   );
   bool _sending = false;
 
