@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/cbt_log.dart';
 import '../services/encrypt.dart';
-import '../config/security.dart';
 
 class CbtController {
   static const String baseUrl = "https://chataid-backend.onrender.com";
@@ -46,7 +45,6 @@ class CbtController {
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection("users").doc(_uid).collection("cbt_logs");
 
-  /// Create a CBT log doc and return its id also encrypt
   Future<String> create(CbtLog log) async {
     final data = await _encryptCbtMap(log);
 
@@ -59,7 +57,6 @@ class CbtController {
     return doc.id;
   }
 
-  /// Save/update an existing CBT log doc (merge)
   Future<void> update(String cbtId, CbtLog log) async {
     final data = await _encryptCbtMap(log);
 
@@ -77,46 +74,23 @@ class CbtController {
   }
 
   Future<Map<String, dynamic>> _encryptCbtMap(CbtLog log) async {
-    if (SecurityConfig.encryptionEnabled) {
-      return {
-        "journalId": log.journalId,
-
-        "situationEnc": await CryptoService.instance.encryptString(
-          log.situation,
-        ),
-        "thoughtEnc": await CryptoService.instance.encryptString(log.thought),
-        "thinkingPatternEnc": await CryptoService.instance.encryptString(
-          log.thinkingPattern,
-        ),
-        "evidenceForEnc": await CryptoService.instance.encryptString(
-          log.evidenceFor,
-        ),
-        "adviceEnc": await CryptoService.instance.encryptString(log.advice),
-        "balancedThoughtEnc": await CryptoService.instance.encryptString(
-          log.balancedThought,
-        ),
-
-        "beforeIntensity": log.beforeIntensity,
-        "afterIntensity": log.afterIntensity,
-        "done": log.done,
-      };
-    } else {
-      // 🔹 testing mode (plaintext)
-      return {
-        "journalId": log.journalId,
-
-        "situation": log.situation,
-        "thought": log.thought,
-        "thinkingPattern": log.thinkingPattern,
-        "evidenceFor": log.evidenceFor,
-        "advice": log.advice,
-        "balancedThought": log.balancedThought,
-
-        "beforeIntensity": log.beforeIntensity,
-        "afterIntensity": log.afterIntensity,
-        "done": log.done,
-      };
-    }
+    return {
+      "situationEnc": await CryptoService.instance.encryptString(log.situation),
+      "thoughtEnc": await CryptoService.instance.encryptString(log.thought),
+      "thinkingPatternEnc": await CryptoService.instance.encryptString(
+        log.thinkingPattern,
+      ),
+      "evidenceForEnc": await CryptoService.instance.encryptString(
+        log.evidenceFor,
+      ),
+      "adviceEnc": await CryptoService.instance.encryptString(log.advice),
+      "balancedThoughtEnc": await CryptoService.instance.encryptString(
+        log.balancedThought,
+      ),
+      "beforeIntensity": log.beforeIntensity,
+      "afterIntensity": log.afterIntensity,
+      "done": log.done,
+    };
   }
 
   Future<CbtLog> _decryptCbtDoc(
@@ -145,7 +119,6 @@ class CbtController {
 
     return CbtLog(
       id: doc.id,
-      journalId: data["journalId"] as String?,
       situation: situation,
       thought: thought,
       thinkingPattern: thinkingPattern,
@@ -158,6 +131,25 @@ class CbtController {
       createdAt: data["createdAt"] as Timestamp?,
       updatedAt: data["updatedAt"] as Timestamp?,
     );
+  }
+
+  Future<void> updateFields(String cbtId, Map<String, dynamic> fields) async {
+    final Map<String, dynamic> toSave = {};
+
+    for (final entry in fields.entries) {
+      if (entry.value is String) {
+        toSave["${entry.key}Enc"] = await CryptoService.instance.encryptString(
+          entry.value as String,
+        );
+      } else {
+        toSave[entry.key] = entry.value;
+      }
+    }
+
+    await _col.doc(cbtId).set({
+      ...toSave,
+      "updatedAt": FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Stream<List<CbtLog>> streamAll() {

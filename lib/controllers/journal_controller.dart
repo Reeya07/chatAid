@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/journal_info.dart';
 import '../services/encrypt.dart';
-import '../config/security.dart';
 
 class JournalController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,24 +11,13 @@ class JournalController {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception("User not logged in");
 
-    Map<String, dynamic> data;
+    final textEnc = await CryptoService.instance.encryptString(log.text);
 
-    if (SecurityConfig.encryptionEnabled) {
-      final textEnc = await CryptoService.instance.encryptString(log.text);
-
-      data = {
-        "textEnc": textEnc,
-        "released": log.released,
-        "createdAt": FieldValue.serverTimestamp(),
-      };
-    } else {
-      // 🔹 testing mode (plaintext)
-      data = {
-        "text": log.text,
-        "released": log.released,
-        "createdAt": FieldValue.serverTimestamp(),
-      };
-    }
+    final data = {
+      "textEnc": textEnc,
+      "released": log.released,
+      "createdAt": FieldValue.serverTimestamp(),
+    };
 
     await _database
         .collection("users")
@@ -53,20 +41,14 @@ class JournalController {
 
           for (final d in snap.docs) {
             final data = d.data();
-            String text = "";
+            String text;
 
             try {
-              final enc = (data["textEnc"] ?? "") as String;
-
-              if (enc.isNotEmpty) {
-                text = await CryptoService.instance.decryptString(enc);
-              } else {
-                text = (data["text"] ?? "") as String;
-              }
+              text = await CryptoService.instance.decryptString(
+                (data["textEnc"] ?? "") as String,
+              );
             } catch (e) {
               print("Decryption failed for doc ${d.id}: $e");
-
-              // fallback text instead of crashing whole screen
               text = "[Unable to decrypt this journal entry]";
             }
 

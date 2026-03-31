@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/daily_progress.dart';
 
 class ProgressController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,9 +13,7 @@ class ProgressController {
 
   DocumentReference<Map<String, dynamic>> _todayDoc() {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception("User not logged in");
-    }
+    if (uid == null) throw Exception("User not logged in");
     return _db
         .collection('users')
         .doc(uid)
@@ -22,7 +21,7 @@ class ProgressController {
         .doc(todayKey());
   }
 
-  Stream<Map<String, dynamic>> streamTodayProgress() {
+  Stream<DailyProgress> streamTodayProgress() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return const Stream.empty();
 
@@ -32,7 +31,11 @@ class ProgressController {
         .collection('dailyProgress')
         .doc(todayKey())
         .snapshots()
-        .map((doc) => doc.data() ?? {});
+        .map(
+          (doc) => doc.exists
+              ? DailyProgress.fromMap(doc.data()!)
+              : DailyProgress(mood: false, chat: false, exercises: false),
+        );
   }
 
   Future<void> markDone(String key) async {

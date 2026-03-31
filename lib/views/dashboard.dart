@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mental_health_app/models/daily_progress.dart';
 import '../views/profile.dart';
 import '../views/mood_history.dart';
 import '../views/chat.dart';
@@ -492,6 +493,44 @@ class DashboardState extends State<Dashboard> {
     );
   }
 
+  Widget disclaimerFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 206, 228, 244),
+        border: Border(
+          top: BorderSide(
+            color: const Color.fromARGB(255, 145, 193, 245),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 13,
+            color: const Color.fromARGB(255, 143, 170, 238),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'This app is not a substitute for professional mental health care. '
+              'If you are in crisis, please contact a licensed professional or emergency services.',
+              style: TextStyle(
+                fontSize: 11,
+                color: const Color.fromARGB(255, 0, 38, 255),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -499,13 +538,13 @@ class DashboardState extends State<Dashboard> {
       floatingActionButton: const EmergencyFab(),
 
       body: SafeArea(
-        child: StreamBuilder<Map<String, dynamic>>(
+        child: StreamBuilder<DailyProgress>(
           stream: _progressC.streamTodayProgress(),
           builder: (context, snapshot) {
-            final progress = snapshot.data ?? {};
+            final progress = snapshot.data;
 
-            final moodDone = progress['mood'] == true;
-            final chatDone = progress['chat'] == true;
+            final moodDone = progress?.mood ?? false;
+            final chatDone = progress?.chat ?? false;
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
@@ -523,6 +562,7 @@ class DashboardState extends State<Dashboard> {
                   SizedBox(height: 14),
                   quickAccess(),
                   SizedBox(height: 14),
+                  disclaimerFooter(),
                 ],
               ),
             );

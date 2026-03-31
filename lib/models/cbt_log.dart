@@ -37,7 +37,6 @@ class CbtLog {
   /// For creating a new record with defaults
   factory CbtLog.empty({String? journalId, String initialThought = ""}) {
     return CbtLog(
-      journalId: journalId,
       situation: "",
       thought: initialThought,
       thinkingPattern: "Unclear",
@@ -51,7 +50,6 @@ class CbtLog {
   }
 
   Map<String, dynamic> toMap() => {
-    "journalId": journalId,
     "situation": situation,
     "thought": thought,
     "thinkingPattern": thinkingPattern,
@@ -67,7 +65,6 @@ class CbtLog {
     final data = doc.data() ?? {};
     return CbtLog(
       id: doc.id,
-      journalId: data["journalId"] as String?,
       situation: (data["situation"] ?? "") as String,
       thought: (data["thought"] ?? "") as String,
       thinkingPattern: (data["thinkingPattern"] ?? "Unclear") as String,
@@ -84,7 +81,6 @@ class CbtLog {
 
   CbtLog copyWith({
     String? id,
-    String? journalId,
     String? situation,
     String? thought,
     String? thinkingPattern,
@@ -99,7 +95,6 @@ class CbtLog {
   }) {
     return CbtLog(
       id: id ?? this.id,
-      journalId: journalId ?? this.journalId,
       situation: situation ?? this.situation,
       thought: thought ?? this.thought,
       thinkingPattern: thinkingPattern ?? this.thinkingPattern,

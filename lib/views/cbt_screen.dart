@@ -93,21 +93,6 @@ class CbtScreenState extends State<CbtScreen> {
     }
   }
 
-  CbtLog _buildLog({required bool done}) {
-    return CbtLog(
-      journalId: widget.journalId,
-      situation: situationC.text,
-      thought: thoughtC.text,
-      thinkingPattern: _selectedPattern,
-      evidenceFor: evidenceC.text,
-      advice: adviceC.text,
-      balancedThought: balancedText,
-      beforeIntensity: before.round(),
-      afterIntensity: after.round(),
-      done: done,
-    );
-  }
-
   void showPattern() {
     final String title = patterns[_selectedPattern] ?? _selectedPattern;
     final String msg = patternExplain[_selectedPattern] ?? "";
@@ -384,7 +369,15 @@ class CbtScreenState extends State<CbtScreen> {
                             //saving to firestore for journal
                             final id = _cbtId;
                             if (id != null) {
-                              await cbt.update(id, _buildLog(done: false));
+                              await cbt.updateFields(id, {
+                                "situation": situationC.text,
+                                "thought": thoughtC.text,
+                                "thinkingPattern": _selectedPattern,
+                                "evidenceFor": evidenceC.text,
+                                "advice": adviceC.text,
+                                "balancedThought": balancedText,
+                                "beforeIntensity": before.round(),
+                              });
                             }
                           } catch (e) {
                             if (!mounted) return;
@@ -451,7 +444,10 @@ class CbtScreenState extends State<CbtScreen> {
 
                             setState(() => _saving = true);
                             try {
-                              await cbt.update(id, _buildLog(done: true));
+                              await cbt.updateFields(id, {
+                                "afterIntensity": after.round(),
+                                "done": true,
+                              });
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text("Saved ✅")),

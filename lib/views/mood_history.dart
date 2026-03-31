@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mental_health_app/models/daily_progress.dart';
 import '../controllers/mood_controller.dart';
 import '../models/mood_log.dart';
 import '../views/chat.dart';
@@ -187,15 +188,14 @@ class MoodHistory extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                 children: [
                   // -------- Today progress card --------
-                  StreamBuilder<Map<String, dynamic>>(
+                  StreamBuilder<DailyProgress>(
                     stream: progressC.streamTodayProgress(),
                     builder: (context, actSnap) {
-                      final data = actSnap.data ?? {};
+                      final data = actSnap.data;
 
-                      final moodDone = data["mood"] == true;
-                      final chatDone = data["chat"] == true;
-                      final exercisesDone = data["exercises"] == true;
-
+                      final moodDone = data?.mood ?? false;
+                      final chatDone = data?.chat ?? false;
+                      final exercisesDone = data?.exercises ?? false;
                       final total = 3;
                       final completed = [
                         moodDone,
