@@ -41,7 +41,6 @@ class MoodGraph extends StatelessWidget {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final today = removeTime(DateTime.now());
     final firstDay = today.subtract(const Duration(days: 6));

@@ -12,22 +12,19 @@ class ChatController {
 
   ChatController({required this.baseUrl});
 
-  String _uid() {
-    final user = auth.currentUser;
-    if (user == null) {
-      throw Exception("User not logged in. Please login again.");
-    }
-    return user.uid;
-  }
-
   Future<Map<String, dynamic>> sendMessage(String message) async {
-    final uid = _uid();
+    final user = auth.currentUser;
+    if (user == null) throw Exception("User not logged in. Please login again.");
+    final uid = user.uid;
+    final isAnon = user.isAnonymous;
 
-    // 1) Save USER message first (always)
-    await chatRep.saveMessage(
-      uid,
-      Chatinfo(role: 'user', text: message, createdAt: Timestamp.now()),
-    );
+    // 1) Save USER message (skip for anonymous users)
+    if (!isAnon) {
+      await chatRep.saveMessage(
+        uid,
+        Chatinfo(role: 'user', text: message, createdAt: Timestamp.now()),
+      );
+    }
 
     // 2) Call backend
     final url = Uri.parse('$baseUrl/chat');
@@ -38,14 +35,16 @@ class ChatController {
     );
 
     if (res.statusCode != 200) {
-      await chatRep.saveMessage(
-        uid,
-        Chatinfo(
-          role: 'assistant',
-          text: "Sorry, I'm having trouble responding right now.",
-          createdAt: Timestamp.now(),
-        ),
-      );
+      if (!isAnon) {
+        await chatRep.saveMessage(
+          uid,
+          Chatinfo(
+            role: 'assistant',
+            text: "Sorry, I'm having trouble responding right now.",
+            createdAt: Timestamp.now(),
+          ),
+        );
+      }
       throw Exception('Backend error: ${res.body}');
     }
 
@@ -57,17 +56,23 @@ class ChatController {
         : null;
     final rec = data['recommendation'] as Map<String, dynamic>?;
 
-    // 3) Save BOT reply
-    await chatRep.saveMessage(
-      uid,
-      Chatinfo(
-        role: 'assistant',
-        text: reply,
-        emotion: emotion,
-        score: score,
-        createdAt: Timestamp.now(),
-      ),
-    );
+    // 3) Save BOT reply (skip for anonymous users)
+    if (!isAnon) {
+      try {
+        await chatRep.saveMessage(
+          uid,
+          Chatinfo(
+            role: 'assistant',
+            text: reply,
+            emotion: emotion,
+            score: score,
+            createdAt: Timestamp.now(),
+          ),
+        );
+      } catch (e) {
+        print('Failed to save bot message: $e');
+      }
+    }
 
     return {
       'reply': reply,

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mental_health_app/models/daily_progress.dart';
 import '../controllers/mood_controller.dart';
@@ -173,7 +174,54 @@ class MoodHistory extends StatelessWidget {
             ),
             iconTheme: const IconThemeData(color: navy),
           ),
-          body: StreamBuilder<List<MoodLog>>(
+          body: FirebaseAuth.instance.currentUser?.isAnonymous == true
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.lock_outline, size: 56, color: ocean),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Sign up to track your mood',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: navy,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Create a free account to log your mood, view history, and track your progress over time.',
+                          style: TextStyle(color: navy, height: 1.4),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ocean,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(22),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 14,
+                            ),
+                          ),
+                          onPressed: () => Navigator.pushReplacementNamed(
+                            context,
+                            'views/register',
+                          ),
+                          child: const Text('Sign up'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : StreamBuilder<List<MoodLog>>(
             stream: controller.streamAllMoodLogs(),
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {

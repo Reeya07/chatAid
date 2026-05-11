@@ -48,6 +48,7 @@ dependencies:
   cloud_firestore: ^6.1.0
   intl: ^0.20.2
   url_launcher: ^6.2.5
+  flutter_local_notifications: ^18.0.1
   
   
 

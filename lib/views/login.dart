@@ -75,7 +75,7 @@ class LoginState extends State<Login> {
         backgroundColor: errorMessage == null ? Colors.green : Colors.red,
       ),
     );
-    Navigator.pushReplacementNamed(context, 'views/dashboard');
+    Navigator.pushReplacementNamed(context, 'views/nav');
   }
 
   Future<void> resetPassword() async {

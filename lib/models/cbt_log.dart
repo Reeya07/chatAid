@@ -37,6 +37,7 @@ class CbtLog {
   /// For creating a new record with defaults
   factory CbtLog.empty({String? journalId, String initialThought = ""}) {
     return CbtLog(
+      journalId: journalId,
       situation: "",
       thought: initialThought,
       thinkingPattern: "Unclear",

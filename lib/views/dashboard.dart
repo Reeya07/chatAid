@@ -75,6 +75,16 @@ class DashboardState extends State<Dashboard> {
   }
 
   Future<void> _saveMoodLog(String emoji, String moodLabel) async {
+    if (FirebaseAuth.instance.currentUser?.isAnonymous == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign up to save your mood and track your progress.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _saving = true;
       _selectedEmoji = emoji;
@@ -176,7 +186,7 @@ class DashboardState extends State<Dashboard> {
         borderRadius: BorderRadius.circular(18),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
-          end: AlignmentGeometry.bottomRight,
+          end: Alignment.bottomRight,
           colors: [primary, secondary],
         ),
         boxShadow: [

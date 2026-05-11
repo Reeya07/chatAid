@@ -11,11 +11,13 @@ import 'views/cbt_screen.dart';
 import 'views/journal.dart';
 import 'views/journal_history.dart';
 import 'services/encrypt.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await CryptoService.instance.init();
+  await NotificationService.init();
   runApp(const MyApp());
 }
 

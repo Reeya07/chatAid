@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../controllers/journal_controller.dart';
 import '../models/journal_info.dart';
@@ -22,7 +23,21 @@ class _JournalScreenState extends State<JournalScreen> {
     super.dispose();
   }
 
+  void _showAnonSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Sign up to save your journal entries.'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+  }
+
   Future<void> _save() async {
+    if (FirebaseAuth.instance.currentUser?.isAnonymous == true) {
+      _showAnonSnackbar();
+      return;
+    }
+
     final text = _textC.text.trim();
     if (text.isEmpty || _saving) return;
 
@@ -44,6 +59,11 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Future<void> _saveAndOpenCbt() async {
+    if (FirebaseAuth.instance.currentUser?.isAnonymous == true) {
+      _showAnonSnackbar();
+      return;
+    }
+
     final text = _textC.text.trim();
     if (text.isEmpty || _saving) return;
 
