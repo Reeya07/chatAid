@@ -44,12 +44,16 @@ class JournalController {
             String text;
 
             try {
-              text = await CryptoService.instance.decryptString(
-                (data["textEnc"] ?? "") as String,
-              );
+              final encVal = (data["textEnc"] ?? "") as String;
+              if (encVal.isEmpty) {
+                // doc predates encryption — read plain text field
+                text = (data["text"] ?? "") as String;
+              } else {
+                text = await CryptoService.instance.decryptString(encVal);
+              }
             } catch (e) {
               print("Decryption failed for doc ${d.id}: $e");
-              text = "[Unable to decrypt this journal entry]";
+              text = (data["text"] ?? "") as String;
             }
 
             list.add(

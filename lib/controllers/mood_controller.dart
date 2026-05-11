@@ -15,7 +15,6 @@ class MoodController {
       ...log.toMap(),
       "createdAt": Timestamp.now(),
     });
-    await tickMoodLogged();
   }
 
   Stream<List<MoodLog>> streamLast7Days() {
@@ -57,48 +56,4 @@ class MoodController {
         );
   }
 
-  String dayId(DateTime dt) {
-    final year = dt.year.toString().padLeft(4, '0');
-    final month = dt.month.toString().padLeft(2, '0');
-    final day = dt.day.toString().padLeft(2, '0');
-    return "$year-$month-$day";
-  }
-
-  DocumentReference<Map<String, dynamic>> todayActivity(String uid) {
-    final id = dayId(DateTime.now());
-    return _database
-        .collection("users")
-        .doc(uid)
-        .collection("daily_activity")
-        .doc(id);
-  }
-
-  Future<void> dailyFlag({required String field, required bool value}) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception("User not logged in");
-
-    await todayActivity(uid).set({
-      field: value,
-      "lastUpdatedAt": FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-  }
-
-  Future<void> tickChatUsed() async {
-    await dailyFlag(field: "chatUsed", value: true);
-  }
-
-  Future<void> tickExerciseDone() async {
-    await dailyFlag(field: "exerciseDone", value: true);
-  }
-
-  Future<void> tickMoodLogged() async {
-    await dailyFlag(field: "moodLogged", value: true);
-  }
-
-  Stream<Map<String, dynamic>> streamTodayActivity() {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return Stream.empty();
-
-    return todayActivity(uid).snapshots().map((doc) => doc.data() ?? {});
-  }
 }

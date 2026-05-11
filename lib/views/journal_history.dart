@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../controllers/journal_controller.dart';
 import '../models/journal_info.dart';
@@ -16,11 +17,10 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
   final TextEditingController searchController = TextEditingController();
 
   // Filters
-  DateTime? selectedMonth; // month/year filter (e.g., Feb 2026)
-  DateTime? selectedDate; // exact day filter (e.g., 26/02/2026)
+  DateTime? selectedDate;
 
   // UI state
-  int? expandedCardIndex; // which card is expanded
+  int? expandedCardIndex;
 
   @override
   void dispose() {
@@ -28,23 +28,13 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
     super.dispose();
   }
 
-  // Helper: month label
-  String monthYearLabel(DateTime date) {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return "${months[date.month - 1]} ${date.year}";
+  static const _months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+
+  String formatDate(DateTime date) {
+    return "${date.day} ${_months[date.month - 1]} ${date.year}";
   }
 
   // Helper: same day check
@@ -52,44 +42,17 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  // Pick Month (we use date picker; user picks any day in desired month)
-  Future<void> pickMonth() async {
-    final DateTime today = DateTime.now();
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedMonth ?? today,
-      firstDate: DateTime(today.year - 5, 1, 1),
-      lastDate: DateTime(today.year + 1, 12, 31),
-      helpText: "Pick any day in the month",
-    );
-
-    if (picked == null) return;
-
-    setState(() {
-      selectedMonth = DateTime(picked.year, picked.month, 1);
-      selectedDate = null; // month filter overrides exact date
-      expandedCardIndex = null;
-    });
-  }
-
-  // Pick exact Date
   Future<void> pickDate() async {
     final DateTime today = DateTime.now();
-
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? today,
       firstDate: DateTime(today.year - 5, 1, 1),
       lastDate: DateTime(today.year + 1, 12, 31),
-      helpText: "Pick a date",
     );
-
     if (picked == null) return;
-
     setState(() {
       selectedDate = DateTime(picked.year, picked.month, picked.day);
-      selectedMonth = null; // exact date overrides month
       expandedCardIndex = null;
     });
   }
@@ -97,7 +60,6 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
   void clearAllFilters() {
     setState(() {
       searchController.clear();
-      selectedMonth = null;
       selectedDate = null;
       expandedCardIndex = null;
     });
@@ -116,7 +78,58 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: StreamBuilder<List<JournalLog>>(
+      body: FirebaseAuth.instance.currentUser?.isAnonymous == true
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.lock_outline,
+                      size: 56,
+                      color: Color(0xFF4FC3F7),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Sign up to view your journal',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0D3B66),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Create a free account to save and revisit your thoughts anytime.',
+                      style: TextStyle(color: Color(0xFF0D3B66), height: 1.4),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E88E5),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                      ),
+                      onPressed: () => Navigator.pushReplacementNamed(
+                        context,
+                        'views/register',
+                      ),
+                      child: const Text('Sign up'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : StreamBuilder<List<JournalLog>>(
         stream: journalController.streamAllJournalLogs(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -156,23 +169,9 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
 
           final List<JournalLog> filteredEntries = allEntries.where((entry) {
             final DateTime? entryDate = entry.createdAt?.toDate();
-            if (entryDate == null) {
-              return selectedMonth == null && selectedDate == null;
-            }
-            if (selectedMonth != null) {
-              if (entryDate.year != selectedMonth!.year ||
-                  entryDate.month != selectedMonth!.month) {
-                return false;
-              }
-            }
-            if (selectedDate != null) {
-              if (!isSameDay(entryDate, selectedDate!)) return false;
-            }
-            if (searchText.isNotEmpty) {
-              if (!entry.text.toLowerCase().contains(searchText)) {
-                return false;
-              }
-            }
+            if (entryDate == null) return selectedDate == null;
+            if (selectedDate != null && !isSameDay(entryDate, selectedDate!)) return false;
+            if (searchText.isNotEmpty && !entry.text.toLowerCase().contains(searchText)) return false;
             return true;
           }).toList();
 
@@ -197,13 +196,9 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
 
   // UI: Filter bar
   Widget buildFilterBar() {
-    final String monthText = selectedMonth == null
-        ? "Month"
-        : monthYearLabel(selectedMonth!);
-
-    final String dateText = selectedDate == null
-        ? "Date"
-        : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}";
+    final String dateLabel = selectedDate == null
+        ? "Filter by date"
+        : formatDate(selectedDate!);
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -247,32 +242,22 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: pickMonth,
+                  onPressed: pickDate,
                   icon: const Icon(Icons.calendar_month),
-                  label: Text(monthText),
+                  label: Text(dateLabel),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4FC3F7),
                     foregroundColor: Colors.white,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: pickDate,
-                  icon: const Icon(Icons.event),
-                  label: Text(dateText),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF29B6F6),
-                    foregroundColor: Colors.white,
-                  ),
+              if (selectedDate != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: clearAllFilters,
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: clearAllFilters,
-              ),
+              ],
             ],
           ),
         ],
@@ -286,7 +271,7 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
 
     final String dateLine = entryDate == null
         ? ""
-        : "${entryDate.day}/${entryDate.month}/${entryDate.year} • "
+        : "${formatDate(entryDate)} • "
               "${entryDate.hour.toString().padLeft(2, '0')}:${entryDate.minute.toString().padLeft(2, '0')}";
 
     return Container(

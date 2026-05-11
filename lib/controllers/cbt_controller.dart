@@ -93,29 +93,23 @@ class CbtController {
     };
   }
 
+  Future<String> _safeDecrypt(Map<String, dynamic> data, String encKey, String plainKey) async {
+    final enc = (data[encKey] ?? "") as String;
+    if (enc.isEmpty) return (data[plainKey] ?? "") as String;
+    return CryptoService.instance.decryptString(enc);
+  }
+
   Future<CbtLog> _decryptCbtDoc(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) async {
     final data = doc.data() ?? {};
 
-    final situation = await CryptoService.instance.decryptString(
-      (data["situationEnc"] ?? "") as String,
-    );
-    final thought = await CryptoService.instance.decryptString(
-      (data["thoughtEnc"] ?? "") as String,
-    );
-    final thinkingPattern = await CryptoService.instance.decryptString(
-      (data["thinkingPatternEnc"] ?? "") as String,
-    );
-    final evidenceFor = await CryptoService.instance.decryptString(
-      (data["evidenceForEnc"] ?? "") as String,
-    );
-    final advice = await CryptoService.instance.decryptString(
-      (data["adviceEnc"] ?? "") as String,
-    );
-    final balancedThought = await CryptoService.instance.decryptString(
-      (data["balancedThoughtEnc"] ?? "") as String,
-    );
+    final situation      = await _safeDecrypt(data, "situationEnc",      "situation");
+    final thought        = await _safeDecrypt(data, "thoughtEnc",         "thought");
+    final thinkingPattern= await _safeDecrypt(data, "thinkingPatternEnc", "thinkingPattern");
+    final evidenceFor    = await _safeDecrypt(data, "evidenceForEnc",     "evidenceFor");
+    final advice         = await _safeDecrypt(data, "adviceEnc",          "advice");
+    final balancedThought= await _safeDecrypt(data, "balancedThoughtEnc", "balancedThought");
 
     return CbtLog(
       id: doc.id,

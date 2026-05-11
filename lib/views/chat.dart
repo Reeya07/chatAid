@@ -1,5 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mental_health_app/controllers/mood_controller.dart';
 import '../controllers/chat_controller.dart';
 import '../models/chat_info.dart';
 import '../controllers/progress_controller.dart';
@@ -218,8 +218,6 @@ class _ChatState extends State<Chat> {
     final text = _textC.text;
     if (text.isEmpty || _sending) return;
 
-    await _progressC.markDone('chat');
-
     setState(() {
       _sending = true;
       _messages.add(Chatinfo(role: 'user', text: text));
@@ -227,10 +225,12 @@ class _ChatState extends State<Chat> {
     _textC.clear();
     try {
       final result = await _chat.sendMessage(text);
+      final isAnon = FirebaseAuth.instance.currentUser?.isAnonymous ?? true;
+      if (!isAnon) {
+        await _progressC.markDone('chat');
+      }
       final reply = result['reply'].toString();
       final rec = result['recommendation'] as Map<String, dynamic>?;
-
-      await MoodController().tickChatUsed();
 
       if (!mounted) return;
       setState(() {
@@ -364,7 +364,7 @@ class _ChatState extends State<Chat> {
           SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsetsGeometry.fromLTRB(10, 6, 10, 10),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
               child: Row(
                 children: [
                   Expanded(

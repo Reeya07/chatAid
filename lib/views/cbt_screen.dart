@@ -76,8 +76,8 @@ class CbtScreenState extends State<CbtScreen> {
     _ensureDoc();
   }
 
-  Future<void> _ensureDoc() async {
-    if (_cbtId != null) return;
+  Future<bool> _ensureDoc() async {
+    if (_cbtId != null) return true;
 
     final log = CbtLog.empty(
       journalId: widget.journalId,
@@ -86,10 +86,16 @@ class CbtScreenState extends State<CbtScreen> {
 
     try {
       final id = await cbt.create(log);
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() => _cbtId = id);
-    } catch (_) {
-      // still allow CBT usage even if save fails
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Could not create record: $e")),
+        );
+      }
+      return false;
     }
   }
 
@@ -267,7 +273,7 @@ class CbtScreenState extends State<CbtScreen> {
           ),
           SizedBox(height: 12),
           card(
-            title: "4) Possible thnking patterns",
+            title: "4) Possible thinking patterns",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -366,10 +372,8 @@ class CbtScreenState extends State<CbtScreen> {
                               _loading = false;
                               balancedText = result;
                             });
-                            //saving to firestore for journal
-                            final id = _cbtId;
-                            if (id != null) {
-                              await cbt.updateFields(id, {
+                            if (await _ensureDoc()) {
+                              await cbt.updateFields(_cbtId!, {
                                 "situation": situationC.text,
                                 "thought": thoughtC.text,
                                 "thinkingPattern": _selectedPattern,
@@ -439,11 +443,10 @@ class CbtScreenState extends State<CbtScreen> {
                     onPressed: _saving
                         ? null
                         : () async {
-                            final id = _cbtId;
-                            if (id == null) return;
-
                             setState(() => _saving = true);
                             try {
+                              if (!await _ensureDoc()) return;
+                              final id = _cbtId!;
                               await cbt.updateFields(id, {
                                 "afterIntensity": after.round(),
                                 "done": true,
