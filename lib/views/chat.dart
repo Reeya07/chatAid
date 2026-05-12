@@ -21,6 +21,7 @@ class _ChatState extends State<Chat> {
   final TextEditingController _textC = TextEditingController();
   final ProgressController _progressC = ProgressController();
   final FocusNode focus = FocusNode();
+  final ScrollController _scrollC = ScrollController();
   final List<Chatinfo> _messages = [
     Chatinfo(
       role: 'assistant',
@@ -33,6 +34,18 @@ class _ChatState extends State<Chat> {
     baseUrl: 'https://chataid-backend.onrender.com',
   );
   bool _sending = false;
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollC.hasClients) {
+        _scrollC.animateTo(
+          _scrollC.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
   Future<void> _openRecommendedExercise(String exerciseId) async {
     await Navigator.push(
@@ -51,7 +64,7 @@ class _ChatState extends State<Chat> {
         ),
       );
     });
-
+    _scrollToBottom();
     FocusScope.of(context).requestFocus(focus);
   }
 
@@ -59,6 +72,7 @@ class _ChatState extends State<Chat> {
   void dispose() {
     _textC.dispose();
     focus.dispose();
+    _scrollC.dispose();
     super.dispose();
   }
 
@@ -73,13 +87,12 @@ class _ChatState extends State<Chat> {
     final lastUser = userMessage();
     final thoughtToUse = lastUser.isNotEmpty ? lastUser : assistantText;
 
-    final rec = _lastRec; // Map<String, dynamic>? stored from backend
+    final rec = _lastRec;
     final String recType = rec?['type']?.toString() ?? 'chat';
     final String recLabel = rec?['label']?.toString() ?? '💬 Continue chatting';
-    final String recId = rec?['id']?.toString() ?? ''; // breathing / grounding
+    final String recId = rec?['id']?.toString() ?? '';
     final String recThought = (rec?['initialThought']?.toString() ?? '').trim();
-    final String journalPrompt = (rec?['journalPrompt']?.toString() ?? '')
-        .trim();
+    final String journalPrompt = (rec?['journalPrompt']?.toString() ?? '').trim();
 
     Future<void> handleRecommendation() async {
       if (recType == 'exercise') {
@@ -117,7 +130,7 @@ class _ChatState extends State<Chat> {
               role: 'assistant',
               text: journalPrompt.isNotEmpty
                   ? "Quick journal prompt \n$journalPrompt"
-                  : "Quick journal prompt \nWrite what’s on your mind right now.",
+                  : "Quick journal prompt \nWrite what's on your mind right now.",
             ),
           );
         });
@@ -125,7 +138,6 @@ class _ChatState extends State<Chat> {
         return;
       }
 
-      // chat
       FocusScope.of(context).requestFocus(focus);
     }
 
@@ -156,7 +168,6 @@ class _ChatState extends State<Chat> {
       );
     }
 
-    // Small helper text so the “smartness” is visible
     final String hint = rec?['reason']?.toString() ?? "Suggested next step:";
 
     return Padding(
@@ -178,13 +189,11 @@ class _ChatState extends State<Chat> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              // ⭐ Recommended action (highlighted)
               chip(
                 label: recLabel,
                 filled: true,
                 onTap: () async => await handleRecommendation(),
               ),
-
               chip(
                 label: "🧠 Explore CBT",
                 onTap: () {
@@ -198,7 +207,6 @@ class _ChatState extends State<Chat> {
               chip(
                 label: "🌿 Exercises",
                 onTap: () async {
-                  // Opens list normally (no auto exercise)
                   await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const Exercises()),
@@ -215,14 +223,17 @@ class _ChatState extends State<Chat> {
   }
 
   Future<void> _send() async {
-    final text = _textC.text;
+    final text = _textC.text.trim();
     if (text.isEmpty || _sending) return;
 
+    FocusScope.of(context).unfocus();
     setState(() {
       _sending = true;
       _messages.add(Chatinfo(role: 'user', text: text));
     });
     _textC.clear();
+    _scrollToBottom();
+
     try {
       final result = await _chat.sendMessage(text);
       final isAnon = FirebaseAuth.instance.currentUser?.isAnonymous ?? true;
@@ -236,19 +247,20 @@ class _ChatState extends State<Chat> {
       setState(() {
         _messages.add(Chatinfo(role: 'assistant', text: reply));
         _lastRec = rec;
+        _sending = false;
       });
+      _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
+      setState(() => _sending = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     }
-    if (!mounted) return;
-    setState(() {
-      _sending = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final itemCount = _messages.length + (_sending ? 1 : 0);
+
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 193, 223, 249),
       appBar: AppBar(
@@ -259,7 +271,6 @@ class _ChatState extends State<Chat> {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             } else {
-              // fallback if it's root
               Navigator.pushReplacementNamed(context, 'views/nav');
             }
           },
@@ -296,10 +307,42 @@ class _ChatState extends State<Chat> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollC,
               padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
               physics: BouncingScrollPhysics(),
-              itemCount: _messages.length,
+              itemCount: itemCount,
               itemBuilder: (context, index) {
+                if (_sending && index == itemCount - 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4, bottom: 6),
+                          child: Icon(Icons.smart_toy_outlined, size: 22, color: primary),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black,
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const _TypingDots(),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 final msg = _messages[index];
                 final isUser = msg.role == 'user';
                 final isLast = index == _messages.length - 1;
@@ -311,14 +354,15 @@ class _ChatState extends State<Chat> {
                       ? MainAxisAlignment.end
                       : MainAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 4, bottom: 6),
-                      child: Icon(
-                        Icons.smart_toy_outlined,
-                        size: 22,
-                        color: primary,
+                    if (!isUser)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4, bottom: 6),
+                        child: Icon(
+                          Icons.smart_toy_outlined,
+                          size: 22,
+                          color: primary,
+                        ),
                       ),
-                    ),
                     Align(
                       alignment: isUser
                           ? Alignment.centerRight
@@ -327,7 +371,6 @@ class _ChatState extends State<Chat> {
                         constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.78,
                         ),
-
                         child: Container(
                           margin: EdgeInsets.only(bottom: 12),
                           padding: EdgeInsets.symmetric(
@@ -390,20 +433,16 @@ class _ChatState extends State<Chat> {
                   const SizedBox(width: 10),
                   GestureDetector(
                     onTap: _sending ? null : _send,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: primary,
+                        color: _sending ? primary.withOpacity(0.5) : primary,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: primary),
                       ),
-                      child: _sending
-                          ? const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(Icons.send, color: Colors.white),
+                      child: Icon(Icons.send, color: Colors.white),
                     ),
                   ),
                 ],
@@ -412,6 +451,60 @@ class _ChatState extends State<Chat> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TypingDots extends StatefulWidget {
+  const _TypingDots();
+
+  @override
+  State<_TypingDots> createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<_TypingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final phase = ((_controller.value * 3) - i).clamp(0.0, 1.0);
+            final opacity = (phase < 0.5 ? phase * 2 : (1 - phase) * 2)
+                .clamp(0.25, 1.0);
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: Opacity(
+                opacity: opacity,
+                child: const CircleAvatar(
+                  radius: 4,
+                  backgroundColor: Colors.black38,
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
