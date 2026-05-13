@@ -324,7 +324,7 @@ class _ChatState extends State<Chat> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
@@ -493,11 +493,11 @@ class _TypingDotsState extends State<_TypingDots>
             final opacity = (phase < 0.5 ? phase * 2 : (1 - phase) * 2)
                 .clamp(0.25, 1.0);
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Opacity(
                 opacity: opacity,
                 child: const CircleAvatar(
-                  radius: 4,
+                  radius: 3,
                   backgroundColor: Colors.black38,
                 ),
               ),

@@ -82,7 +82,7 @@ class MoodGraph extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Mood trend(last 7 days)",
+          "Mood trend",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
