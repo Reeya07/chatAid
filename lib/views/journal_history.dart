@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../controllers/journal_controller.dart';
@@ -29,8 +28,18 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
   }
 
   static const _months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   String formatDate(DateTime date) {
@@ -130,67 +139,77 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
               ),
             )
           : StreamBuilder<List<JournalLog>>(
-        stream: journalController.streamAllJournalLogs(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error loading thoughts: ${snapshot.error}",
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
+              stream: journalController.streamAllJournalLogs(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error loading thoughts: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
 
-          final List<JournalLog> allEntries = snapshot.data ?? [];
+                final List<JournalLog> allEntries = snapshot.data ?? [];
 
-          if (allEntries.isEmpty) {
-            return const Center(
-              child: Text(
-                "No thoughts yet 🫧",
+                if (allEntries.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No thoughts yet 🫧",
 
-                style: TextStyle(color: Colors.black54),
-              ),
-            );
-          }
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  );
+                }
 
-          // Sort newest first
-          allEntries.sort((a, b) {
-            final DateTime dateA =
-                a.createdAt?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final DateTime dateB =
-                b.createdAt?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
-            return dateB.compareTo(dateA);
-          });
+                // Sort newest first
+                allEntries.sort((a, b) {
+                  final DateTime dateA =
+                      a.createdAt?.toDate() ??
+                      DateTime.fromMillisecondsSinceEpoch(0);
+                  final DateTime dateB =
+                      b.createdAt?.toDate() ??
+                      DateTime.fromMillisecondsSinceEpoch(0);
+                  return dateB.compareTo(dateA);
+                });
 
-          final String searchText = searchController.text.trim().toLowerCase();
+                final String searchText = searchController.text
+                    .trim()
+                    .toLowerCase();
 
-          final List<JournalLog> filteredEntries = allEntries.where((entry) {
-            final DateTime? entryDate = entry.createdAt?.toDate();
-            if (entryDate == null) return selectedDate == null;
-            if (selectedDate != null && !isSameDay(entryDate, selectedDate!)) return false;
-            if (searchText.isNotEmpty && !entry.text.toLowerCase().contains(searchText)) return false;
-            return true;
-          }).toList();
+                final List<JournalLog> filteredEntries = allEntries.where((
+                  entry,
+                ) {
+                  final DateTime? entryDate = entry.createdAt?.toDate();
+                  if (entryDate == null) return selectedDate == null;
+                  if (selectedDate != null &&
+                      !isSameDay(entryDate, selectedDate!))
+                    return false;
+                  if (searchText.isNotEmpty &&
+                      !entry.text.toLowerCase().contains(searchText))
+                    return false;
+                  return true;
+                }).toList();
 
-          return Column(
-            children: [
-              buildFilterBar(),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredEntries.length,
-                  itemBuilder: (context, index) {
-                    return buildEntryCard(filteredEntries[index]);
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+                return Column(
+                  children: [
+                    buildFilterBar(),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filteredEntries.length,
+                        itemBuilder: (context, index) {
+                          return buildEntryCard(filteredEntries[index]);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
     );
   }
 

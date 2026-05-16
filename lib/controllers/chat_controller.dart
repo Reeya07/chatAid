@@ -14,7 +14,8 @@ class ChatController {
 
   Future<Map<String, dynamic>> sendMessage(String message) async {
     final user = auth.currentUser;
-    if (user == null) throw Exception("User not logged in. Please login again.");
+    if (user == null)
+      throw Exception("User not logged in. Please login again.");
     final uid = user.uid;
     final isAnon = user.isAnonymous;
 
@@ -56,7 +57,6 @@ class ChatController {
         : null;
     final rec = data['recommendation'] as Map<String, dynamic>?;
 
-    // 3) Save BOT reply (skip for anonymous users)
     if (!isAnon) {
       try {
         await chatRep.saveMessage(
@@ -105,7 +105,6 @@ class ChatController {
       throw Exception("Failed to reframe: ${response.body}");
     }
 
-    // FIX: you were jsonEncoding a string (wrong)
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }

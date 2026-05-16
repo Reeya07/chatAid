@@ -92,7 +92,8 @@ class _ChatState extends State<Chat> {
     final String recLabel = rec?['label']?.toString() ?? '💬 Continue chatting';
     final String recId = rec?['id']?.toString() ?? '';
     final String recThought = (rec?['initialThought']?.toString() ?? '').trim();
-    final String journalPrompt = (rec?['journalPrompt']?.toString() ?? '').trim();
+    final String journalPrompt = (rec?['journalPrompt']?.toString() ?? '')
+        .trim();
 
     Future<void> handleRecommendation() async {
       if (recType == 'exercise') {
@@ -320,11 +321,18 @@ class _ChatState extends State<Chat> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 4, bottom: 6),
-                          child: Icon(Icons.smart_toy_outlined, size: 22, color: primary),
+                          child: Icon(
+                            Icons.smart_toy_outlined,
+                            size: 22,
+                            color: primary,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
@@ -485,13 +493,15 @@ class _TypingDotsState extends State<_TypingDots>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, __) {
+      builder: (_, _) {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(3, (i) {
             final phase = ((_controller.value * 3) - i).clamp(0.0, 1.0);
-            final opacity = (phase < 0.5 ? phase * 2 : (1 - phase) * 2)
-                .clamp(0.25, 1.0);
+            final opacity = (phase < 0.5 ? phase * 2 : (1 - phase) * 2).clamp(
+              0.25,
+              1.0,
+            );
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Opacity(

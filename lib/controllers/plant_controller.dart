@@ -27,9 +27,6 @@ class PlantController {
     return lastWatered != _todayKey();
   }
 
-  /// Water once per day:
-  /// - +1 point normally
-
   Future<int> waterPlant() async {
     final user = _auth.currentUser;
     if (user == null) return 0;
@@ -45,7 +42,6 @@ class PlantController {
       final int growthPoints = (data['growthPoints'] ?? 0) as int;
       final String lastWatered = (data['lastWatered'] ?? '') as String;
 
-      // Already watered today -> do nothing
       if (!canWaterToday(lastWatered)) {
         pointsAdded = 0;
         return;
