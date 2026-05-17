@@ -137,6 +137,21 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                     ),
 
                     const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _callNumber("188"),
+                        icon: const Icon(Icons.phone),
+                        label: const Text("Life Plus(24/7)"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF4A90E2),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
 
                     // Personal contact — shown only if saved in profile
                     if (_personalContactName != null)
