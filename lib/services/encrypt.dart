@@ -22,16 +22,23 @@ class CryptoService {
   }
 
   Future<SecretKey> _getOrCreateKey() async {
-    final existing = await _secure.read(key: _keyName);
-    if (existing != null) {
-      final bytes = base64Decode(existing);
-      return SecretKey(bytes);
+    try {
+      final existing = await _secure.read(key: _keyName);
+
+      if (existing != null) {
+        final bytes = base64Decode(existing);
+        return SecretKey(bytes);
+      }
+    } catch (e) {
+      await _secure.delete(key: _keyName);
     }
 
     final key = await _algo.newSecretKey();
     final keyBytes = await key.extractBytes();
+
     await _secure.write(key: _keyName, value: base64Encode(keyBytes));
-    return key;
+
+    return SecretKey(keyBytes);
   }
 
   Uint8List _randomNonce([int length = 12]) {

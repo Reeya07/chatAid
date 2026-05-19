@@ -183,6 +183,8 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
                 final List<JournalLog> filteredEntries = allEntries.where((
                   entry,
                 ) {
+                  if (entry.text.trim().isEmpty) return false;
+
                   final DateTime? entryDate = entry.createdAt?.toDate();
                   if (entryDate == null) return selectedDate == null;
                   if (selectedDate != null &&
