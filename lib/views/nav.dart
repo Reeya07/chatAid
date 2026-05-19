@@ -6,14 +6,16 @@ import 'mood_history.dart';
 import 'journal.dart';
 
 class MainNav extends StatefulWidget {
-  const MainNav({super.key});
+  final int initialIndex;
+
+  const MainNav({super.key, this.initialIndex = 0});
 
   @override
   State<MainNav> createState() => _MainNavState();
 }
 
 class _MainNavState extends State<MainNav> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   final List<Widget> _pages = [
     Dashboard(),
@@ -22,6 +24,11 @@ class _MainNavState extends State<MainNav> {
     MoodHistory(),
     JournalScreen(),
   ];
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

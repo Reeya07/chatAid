@@ -14,6 +14,7 @@ import '../models/user.dart';
 import '../widgets/mood_graph.dart';
 import '../widgets/plant.dart';
 import '../widgets/emergencyButton.dart';
+import '../views/nav.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -243,9 +244,11 @@ class DashboardState extends State<Dashboard> {
                 ),
               ),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => Chat()),
+                  MaterialPageRoute(
+                    builder: (_) => const MainNav(initialIndex: 1),
+                  ),
                 );
               },
               child: Text("Start a chat"),
