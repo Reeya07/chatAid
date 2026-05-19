@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mental_health_app/views/chat.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -183,11 +184,12 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                       ),
 
                     const SizedBox(height: 12),
-
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.white),
                           foregroundColor: Colors.white,
@@ -196,8 +198,6 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                         child: const Text("Close"),
                       ),
                     ),
-
-                    const SizedBox(height: 30),
                   ],
                 ),
               ],

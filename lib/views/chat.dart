@@ -22,18 +22,63 @@ class _ChatState extends State<Chat> {
   final ProgressController _progressC = ProgressController();
   final FocusNode focus = FocusNode();
   final ScrollController _scrollC = ScrollController();
-  final List<Chatinfo> _messages = [
+  List<Chatinfo> _messages = [
     Chatinfo(
       role: 'assistant',
       text:
-          'Hello, I am here to support you on yout mental wellness journey.How are you feeling today?',
+          'Hello, I am here to support you on your mental wellness journey. How are you feeling today?',
     ),
   ];
-
   final ChatController _chat = ChatController(
     baseUrl: 'https://chataid-backend.onrender.com',
   );
   bool _sending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayMessages();
+  }
+
+  Future<void> _loadTodayMessages() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) return;
+
+    final now = DateTime.now();
+
+    _chat.chatRep.messageStream(uid).listen((messages) {
+      final todayMessages = messages.where((msg) {
+        final created = msg.createdAt?.toDate();
+
+        if (created == null) return false;
+
+        return created.year == now.year &&
+            created.month == now.month &&
+            created.day == now.day;
+      }).toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        _messages = [];
+
+        if (todayMessages.isEmpty) {
+          _messages.add(
+            Chatinfo(
+              role: 'assistant',
+              text:
+                  'Hello, I am here to support you on your mental wellness journey. How are you feeling today?',
+            ),
+          );
+        } else {
+          _messages.addAll(todayMessages);
+        }
+      });
+
+      _scrollToBottom();
+    });
+  }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -102,7 +147,7 @@ class _ChatState extends State<Chat> {
         return;
       }
       if (recType == 'support') {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const EmergencyScreen()),
         );
